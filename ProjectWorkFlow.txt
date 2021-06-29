@@ -1,0 +1,40 @@
+Workflow for the graded refractive index calculation project.
+
+Discription:
+    The project aims to create a program that can estimate the graded
+refractive index in small objects by importing a stack if interference 
+microscopy images and using an itterative raytracing to find the refractive
+index.
+
+
+Components:
+
+Defining volume:
+    % Importing images              - Lost
+    % Selecting area of interest    - Lost
+    % Aligning images               - Postponed
+    % Finding borders
+    % Defining size
+    % Defining center line
+    % Defining slices
+
+Refractive index calculation:
+    % Creating phase shift profile fom image stack
+    % Initial refractive index aproximation from phase shift values
+    % Itterative ray tracing
+    % Full body analysis and extrapolation
+
+Test data and Models:
+    % Create a set of geometrical "analytical" shapes
+        - 2D    - Complete
+        - 3D
+    % Create GRIN volumes with known refractive index
+        - 2D    - Complete
+        - 3D
+    % Create a PDS for the two and 3 dim case
+        - 2D    - partial (only circular shapes)
+        - 3D
+    % Simulate phase shift maps for the known shapes/GRINs
+        - 2D
+        - 3D
+
