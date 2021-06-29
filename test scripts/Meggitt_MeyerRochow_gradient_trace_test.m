@@ -13,17 +13,17 @@ m = n1;
 a = (n0-n1);
 nGradient = @(x) a.*x.^2 + m ;
 
+grinRange = [1.3,1.45];
 tic
-meggitMeyer(s,r,1000,nGradient)
+meggitMeyer(s,r,100,grinRange)
 toc
 
-grinRange = [1.3,1.45];
-grin = GRIN2d(0.001,'parabolic','matrix',1.3,grinRange);
+grin = GRIN2d(0.01,'parabolic','matrix',1.3,grinRange);
 s2 = source2d(p', v', nRays, width, n0);
 
 tic
 stopLine = -1;
-rayTrace2dGRIN_parallel(s2,grin,0.001,stopLine);
+rayTrace2dGRIN_parallel(s2,grin,0.01,stopLine);
 toc
 figure(1)
 hold on; grid on
@@ -31,41 +31,16 @@ s2.plotTrace(1,'b')
 s.plotTrace(1,'r')
 plotCircle(1,2*pi,1);
 
-% figure(2)
-% grin.plot_nIndex_line(2)
-% plot(linspace(0,1,100),nGradient(linspace(0,1,100)))
 
-% s.plotP(1)
-% s.plotTrace(1)
-% plotLine([-1.5 0],[1.5 0],'k',1)
-% s.plotBacktrack(0,1)
-% 
-% plotCircle(1,1)
-% title('Meggitt & Meyer-Rochow trace')
-% plotLine([-1.5 0],[1.5 0],1)
 
-% nRays = 14;
-% s3 = source2d(p', v', nRays, width, n);
-% itterativeTrace_singleGradient(s3,r,1000)
-% s3.plotTrace(3)
-% plotCircle(1,3)
-% title('Meggitt & Meyer-Rochow trace')
-% plotLine([-1.5 0],[1.5 0],'k',3)
-% s3.plotBacktrack(0,3)
-
-% s.plotTrace(1,'r')
-% plotCircle(1,2)
-% camroll(-90)
-% title('Runge-Kutta trace')
-% s2.plotOP(2)
-
-function meggitMeyer(s,r,steps,nFunc)
+function meggitMeyer(s,r,steps,nRange)
 nRays = s.nRays;
 ds = r*2/steps;
 maxSteps = steps*2;
-n0 = nFunc(1);
-n1 = nFunc(0); 
-
+n0 = nRange(1);
+n1 = nRange(2);
+k = (n0-n1);
+nFunc = @(x) k.*x.^2 + n1; 
 arrayfun(@traceRay,1:s.nRays);
 
 % function itterativeTrace_singleGradient(s,r,steps)
@@ -169,19 +144,19 @@ sN = -p';
 sN = sN./sqrt(sN(1)^2 + sN(2)^2);
 % rs = sqrt(p(1)^2 + p(2)^2);
 % ns = nFunc(rs);
-na = nFunc(r0 + ds/2);
-nb = nFunc(r0 - ds/2);
-% na = nGradient(rs + ds);
-% nb = nGradient(rs - ds);
+dn = nFunc(r0);
+% na = nFunc(r0 + ds/2);
+% nb = nFunc(r0 - ds/2);
 % if na == 1
 %     D = norm(p-sN.*ds) - 1;
 % else
 %     D = 2*ds;
 % end
-D = ds;
+% D = ds;
 % D = sqrt(r0^2 + r1^2);
 theta = acos(sN(1)*v(1) + sN(2)*v(2));
-r = ((na + nb)/2) / (sin(theta)*((nb-na)/(D)));
+% r = ((na + nb)/2) / (sin(theta)*((nb-na)/(D)));
+r = (dn) / (sin(theta)*(-2*k*r0));
 test = 1;
 end
 end

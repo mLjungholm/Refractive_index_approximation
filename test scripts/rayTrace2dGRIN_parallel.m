@@ -4,24 +4,11 @@ function rayTrace2dGRIN_parallel(source,grin,stepSize,stopLine)
 arrayfun(@trace_ray,1:source.nRays);
 
     function trace_ray(rayInd)
-        %     % GRIN
-        %     [X,Y,P] = create_2d_grin(0.01, 'linear', 'matrix');
-        %     [px,py] = gradient(P,0.01);
-        %     dX = P.*px;
-        %     dY = P.*py;
-        %
-        %     % Ray
-        %     V = [1; 0];
-        %     R = [-2; 0.5];
-        %     n1 = 1;
-        %     n2 = 1;
-        
         V = source.V(rayInd,:)';
         R = source.P(rayInd,:)';
         n1 = source.nStart;
         n2 = grin.nEdge;
-        
-        
+                
         [p,intersect] = circleLineIntersect(1,R',V');
         
         if ~intersect

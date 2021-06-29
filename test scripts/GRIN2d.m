@@ -74,8 +74,10 @@ classdef GRIN2d < handle
             end
             
             [px,py] = gradient(this.P,this.stepsize);
-            this.dX = this.P.*px;
-            this.dY = this.P.*py;
+%             this.dX = this.P.*px;
+%             this.dY = this.P.*py;
+this.dX = px;
+this.dY = py;
         end
         
         function plot_nIndex(this)
