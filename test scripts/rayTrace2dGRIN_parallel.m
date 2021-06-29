@@ -34,10 +34,14 @@ arrayfun(@trace_ray,1:source.nRays);
         stepNr = 3;
         rayPath = zeros(maxSteps,2);
         rayPath(:,1) = nan; rayPath(:,2) = nan;
+        vPath = rayPath;
+        nPath = rayPath;
         rayVpath = rayPath;
         raydV = rayPath;
         rayPath(1,:) = R';
         rayPath(2,:) = p;
+        vPath(1,:) = V;
+        nPath(1) = n1;
         if p(2) == 0
            rayPath(3,:) = [p(1),stopLine];
            source.PT{rayInd} = rayPath;
@@ -52,6 +56,9 @@ arrayfun(@trace_ray,1:source.nRays);
         [vNew, ~] = Snell(V', N, n1, n2);
         rayVpath(2,:) = vNew;
         V = vNew';
+        vPath(2,:) = V;
+        closest = findClosest(R);
+        nPath(2) = grin.P(closest(2),closest(1));
 %         inside = 0;
 %         extraStep = 1;
 %         while ~inside
@@ -86,6 +93,7 @@ arrayfun(@trace_ray,1:source.nRays);
             C = dt*[grin.dX(closest(2),closest(1));grin.dY(closest(2),closest(1))];
             R2 = R + dt*(V + 1/6*(A + 2*B));
             V2 = V + 1/6*(A + 4*B + C);
+            closest = findClosest(R);
             if R2(2) <= stopLine
                 t = (stopLine-R(2))/V2(2);
                 R2 = [R(1) + t*V2(1),stopLine]';
@@ -108,6 +116,8 @@ arrayfun(@trace_ray,1:source.nRays);
             source.OP(rayInd) = source.OP(rayInd) + sqrt(dp(1)^2 + dp(2)^2)*grin.P(closest(2),closest(1));
             rayPath(stepNr,:) = R2';
             rayVpath(stepNr,:) = V';
+            vPath(stepNr,:) = V';
+            nPath(stepNr) = grin.P(closest(2),closest(1));
             R = R2;
             V = V2;
             source.P(rayInd,:) = R;
@@ -119,7 +129,8 @@ arrayfun(@trace_ray,1:source.nRays);
             end
         end
         source.PT{rayInd} = rayPath;
-        
+        source.vPath{rayInd} = vPath;
+        source.nPath{rayInd} = nPath;
         function closest = findClosest(P)
             [~,closestX] = min(abs(grin.X(1,:)-P(1)));
             [~,closestY] = min(abs(grin.Y(:,1)-P(2)));

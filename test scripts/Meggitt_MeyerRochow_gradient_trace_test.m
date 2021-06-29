@@ -1,24 +1,39 @@
 v = [0;-1];
-p = [0;2];
-nRays = 4;
+p = [0;1.2];
+nRays = 2;
 % nRays = 100;
-width = 4;
+width = 1.5;
 n0 = 1.3;
 n1 = 1.45;
 r = 1;
 
 s = source2d(p', v', nRays, width, n0);
-% nGradient = @(r) sqrt(1 - r.^2).*(1.2-1) + 1;
 
 m = n1;
 a = (n0-n1);
 nGradient = @(x) a.*x.^2 + m ;
 
-% plot([0:0.1:1]',nGradient([0:0.1:1]'))
 tic
-meggitMeyer(s,r,10000,nGradient)
+meggitMeyer(s,r,1000,nGradient)
 toc
-% itterativeTrace_singleGradient(s,r,1000)
+
+grinRange = [1.3,1.45];
+grin = GRIN2d(0.001,'parabolic','matrix',1.3,grinRange);
+s2 = source2d(p', v', nRays, width, n0);
+
+tic
+stopLine = -1;
+rayTrace2dGRIN_parallel(s2,grin,0.001,stopLine);
+toc
+figure(1)
+hold on; grid on
+s2.plotTrace(1,'b')
+s.plotTrace(1,'r')
+plotCircle(1,2*pi,1);
+
+% figure(2)
+% grin.plot_nIndex_line(2)
+% plot(linspace(0,1,100),nGradient(linspace(0,1,100)))
 
 % s.plotP(1)
 % s.plotTrace(1)
@@ -38,7 +53,7 @@ toc
 % plotLine([-1.5 0],[1.5 0],'k',3)
 % s3.plotBacktrack(0,3)
 
-s.plotTrace(1,'r')
+% s.plotTrace(1,'r')
 % plotCircle(1,2)
 % camroll(-90)
 % title('Runge-Kutta trace')
@@ -89,6 +104,8 @@ end
         rayPath = [];
         exitVol = 0;
         rayPath = zeros(maxSteps,2);  % Create new path vector
+        vPath = rayPath.*nan;
+        nPath = rayPath.*nan;
         rayPath(:,1) = nan; rayPath(:,2) = nan;
         rayPath(1,:) = s.P(rayInd,:);   % Set origin point
         rayPath(2,:) = ip;              % Set volume intersection point
@@ -99,14 +116,18 @@ end
         v0 = v0./sqrt(v0(1)^2 + v0(2)^2);
         p0 = rayPath(rayStep,:);        % Current point
         r0 = sqrt(p0(1)^2 + p0(2)^2);   % Current distance from center.
-        
+        vPath(1,:) = v0;
+        nPath(1) = n0;
         % Run untill threshold is met or max itterations are reached
         while ~exitVol && rayStep < maxSteps
-            sN = -p0';
-            sN = sN./sqrt(sN(1)^2 + sN(2)^2);
-            theta = acos(sN(1)*v0(1) + sN(2)*v0(2));
-            rn = ((n0 + n1)/2) / (sin(theta)*(n1-n0));
-            [p1,v1] = curvePath(p0,v0,rn,ds); % Move one integration distance
+            %             sN = -p0';
+            %             sN = sN./sqrt(sN(1)^2 + sN(2)^2);
+            %             theta = acos(sN(1)*v0(1) + sN(2)*v0(2));
+            %             rn = ((n0 + n1)/2) / (sin(theta)*(n1-n0));
+            vPath(rayStep,:) = v0;
+            nPath(rayStep) = nFunc(r0);
+            rn = getLocalRadiusKnownGradient(p0,v0,r0);
+            [p1,v1] = curvePath(p0,v0,rn,ds); % Move one integration distance           
             r1 = sqrt(p1(1)^2 + p1(2)^2);  % Current distance from center of volume
 %             if ~isreal(r1)
 %                 testflag = 1;
@@ -132,6 +153,8 @@ end
             r0 = r1;
         end
         s.PT{rayInd} = rayPath;
+        s.nPath{rayInd} = nPath;
+        s.vPath{rayInd} = vPath;
         s.phase(rayInd) = phaseSum;
         s.P(rayInd,:) = p0;
         s.V(rayInd,:) = v0;
@@ -140,25 +163,25 @@ end
 
 
 
-% function r = getLocalRadiusKnownGradient(p,v)
-% % nGradient = @(r) real(sqrt(1 - r.^2)).*(1.3-1) + 1;
-% sN = -p';
-% sN = sN./sqrt(sN(1)^2 + sN(2)^2);
-% % rs = sqrt(p(1)^2 + p(2)^2);
-% % ns = nFunc(rs);
-% % na = nFunc(rs + ds);
-% % nb = nFunc(rs - ds);
-% % na = nGradient(rs + ds);
-% % nb = nGradient(rs - ds);
-% % if na == 1
-% %     D = norm(p-sN.*ds) - 1;
-% % else
-% %     D = 2*ds;
-% % end
-% D = sqrt(r0^2 + r1^2);
-% theta = acos(sN(1)*v(1) + sN(2)*v(2));
-% % r = ((na + nb)/2) / (sin(theta)*((nb-na)/(D)));
-% r = ((n0 + n1)/2) / (sin(theta)*((n1-n0)/(D)));
-% test = 1;
+function r = getLocalRadiusKnownGradient(p,v,r0)
+% nGradient = @(r) real(sqrt(1 - r.^2)).*(1.3-1) + 1;
+sN = -p';
+sN = sN./sqrt(sN(1)^2 + sN(2)^2);
+% rs = sqrt(p(1)^2 + p(2)^2);
+% ns = nFunc(rs);
+na = nFunc(r0 + ds/2);
+nb = nFunc(r0 - ds/2);
+% na = nGradient(rs + ds);
+% nb = nGradient(rs - ds);
+% if na == 1
+%     D = norm(p-sN.*ds) - 1;
+% else
+%     D = 2*ds;
 % end
+D = ds;
+% D = sqrt(r0^2 + r1^2);
+theta = acos(sN(1)*v(1) + sN(2)*v(2));
+r = ((na + nb)/2) / (sin(theta)*((nb-na)/(D)));
+test = 1;
+end
 end

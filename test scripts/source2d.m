@@ -13,6 +13,8 @@ classdef source2d < handle
         OP = [];    % Optical path length
         phase = [];
         backTrace = [];
+        vPath = {};
+        nPath = {};
     end
     methods
         function this = source2d(startP,startV, nRays, sWidth,refractiveIndex)
@@ -21,6 +23,8 @@ classdef source2d < handle
             this.V = ones(nRays,2).*startV;
             this.ended = zeros(nRays,1);
             this.PT = cell(nRays,1);
+            this.vPath = cell(nRays,1);
+            this.nPath = cell(nRays,1);
             this.nStart = refractiveIndex;
             this.OP = zeros(nRays,1);
             this.phase = zeros(nRays,1);
