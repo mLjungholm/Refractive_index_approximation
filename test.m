@@ -20,45 +20,57 @@ n0 = 1.3;
 n1 = 1.45;
 k = n0-n1;
 r = 1;
-ds = 10^-6;
+ds = 10^-5;
 nFunc = @(x) k.*x.^2 + n1;
 p0 = [0.7 2];
 v0 = [0 -1];
 
 [ip0,~,~] = circleIntersect(r,p0,v0);
-[dr,nn1,dn1] = getLocalRadiusKnownGradient(ip0,v0,r,nFunc,k);
-[p1,v1] = curvePath(ip0,v0,dr,ds);
-[p2,v2,nn2,dn2] = rungekuttaTrace(ip0',v0',ds,n0,n1);
+ip0 = ip0 + [0 -0.4];
+r0 = norm(ip0);
 
-dang = @(v0,v1) acos(v0(1)*v1(1) + v0(2)*v1(2)/(sqrt(v0(1)^2 + v0(2)^2)*sqrt(v1(1)^2 + v1(2)^2)));
+tic
+dr = getLocalRadiusKnownGradient(ip0,v0,r0,n0,n1);
+[p1,v1] = curvePath(ip0,v0,dr,ds);
+toc
+tic
+[p2,v2] = rungekuttaTrace(ip0',v0',ds,n0,n1);
+toc
+
+dang = @(u,v) acos(u(1)*v(1) + u(2)*v(2)/(sqrt(u(1)^2 + u(2)^2)*sqrt(v(1)^2 + v(2)^2)));
 
 ang1 = dang(v0,v1);
 ang2 = dang(v0,v2);
-
 difAng = ((ang1-ang2)/ang1).*100;
 
-function [r,n,dn] = getLocalRadiusKnownGradient(p,v,r0,nFunc,k)
+function r = getLocalRadiusKnownGradient(p,v,r0,n0,n1)
 sN = -p';
 sN = sN./sqrt(sN(1)^2 + sN(2)^2);
+v = v./norm(v);
+k = n0-n1;
+nFunc = @(r) k*r^2 + n1;
 n = nFunc(r0);
 theta = acos(sN(1)*v(1) + sN(2)*v(2));
 dn = -2*k*r0;
 r = (n) / (sin(theta)*dn);
 end
 
-function [p1,v1,np,dn] = rungekuttaTrace(p0,v0,ds,n0,n1)
+function [p1,v1] = rungekuttaTrace(p0,v0,ds,n0,n1)
 v0 = v0./norm(v0);
 k = n0-n1;
-n = @(r) k*sqrt(r(1)^2 + r(2)^2)^2 + n1;
-dnds = @(r) r.*[k/sqrt(r(1)^2 + r(2)^2) ; k/sqrt(r(1)^2 + r(2)^2)];
-D = @(r) n(r).*dnds(r);
-A = ds.*D(p0);
-B = ds.*D(p0 + ds/2.*v0 + ds/8.*A);
-C = ds.*D(p0 + ds.*v0 + ds/2.*B);
+n = @(r) k*(r(1)^2 + r(2)^2) + n1;
+dnds = @(r) 2*k*[p0(1);p0(2)];
+D2 = @(r) n(r).*dnds(r);
+D = @(r) 2*k.*[k.*(r(1)^3 + r(1)*r(2)^2) + n1*r(1);
+               k.*(r(2)^3 + r(2)*r(1)^2) + n1*r(2)];
+
+A = ds.*D2(p0);
+B = ds.*D2(p0 + ds/2.*v0 + ds/8.*A);
+C = ds.*D2(p0 + ds.*v0 + ds/2.*B);            
+% A = ds.*D(p0);
+% B = ds.*D(p0 + ds/2.*v0 + ds/8.*A);
+% C = ds.*D(p0 + ds.*v0 + ds/2.*B);
 p1 = p0 + ds.*(v0 + 1/6.*(A + 2.*B));
 v1 = v0 + 1/6.*(A + 4.*B + C);
-
-np = n(p0);
-dn = norm(dnds(p0));
 end
 
