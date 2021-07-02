@@ -1,140 +1,107 @@
 % calculate the phase shift for any given ray tracing
 % input: source, stop-line, width of source
 close all
-% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           Tracing the rays
+% Source parameters
+v = [0;-1];
+p = [0;1.2];
+nRays = 1000;
+width = 2.2;
+n0 = 1.3;
+n1 = 1.45;
+% r = 1;
+
+% Initiate source
+s = source2d(p', v', nRays, width, n0, 'half');
+
+% Initiate ray trace
+ds = 10^3;
+tic
+runge_kutta_trace_known_gradient(s,ds,'parabolic',n0,n1,1)
+toc
+
+% Plot result
 % figure(1)
-% scatter(s.backTrace(:,1),s.phase)
+% hold on; axis equal; grid on
+% title('Runge-Kutta ray-trace')
+% plotCircle(1,2*pi,1)
+% plotLine([-1.2 0],[1.2 0],'k',1)
+% plotLine([0 -1.2],[0 1.2],'k',1)
+% s.plotTrace(1,'r')
 
-lambda = 550*10^-9;
-% r = 1.65*10^-5; % [10um]
-r = lambda*10*2;
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       Calculating phaseShift
+%
+% Simulated parameters of object
+lambda = 550*12^-9;
+r = lambda*6*2;
 xRange = [0,1];
-% phaseShift = s.getPhaseShiftValues(lambda,r,xRange);
 
-% phaseShift = s.phase.*scale;
-% phasePos = s.backTrace(:,1);
-% phaseShift = phaseShift(phasePos > -1);
-% phasePos = phasePos(phasePos > -1);
-% phaseShift = phaseShift(phasePos < 1);
-% phasePos = phasePos(phasePos < 1);
-% phasePos = phasePos.*scale;
-% phaseFunc = @(x) (cos(x*2*pi/lambda + pi) + 1)/2;
-% dphase = phaseFunc(phaseShift);
+% Calculating phaseshift values at center line
+s.getBacktrace(0);
 phaseShift = s.getPhaseShiftValues(lambda,r,xRange);
-% f = fit(phaseShift(:,2),phaseShift(:,1),'smoothingspline','SmoothingParam',0.9);
-[peakVal,peakPos,peaksN] = findPeaks(phaseShift(:,2),phaseShift(:,1),0.1);
+phaseShift = [phaseShift; 0 r];
+[peakVal,peakPos,peaksN] = findPeaks(phaseShift(:,2),phaseShift(:,1),0.2);
 
-figure(1)
-hold on
+% Visualization of phase shift
+figure(2)
+hold on; title('Phase shift')
+xlabel('radius [m]')
 plot(phaseShift(:,2),phaseShift(:,1))
 scatter(peakPos,peakVal)
 
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               Testing phase shift profile gained from peaks
+%               against the full trace
+
+phaseDiff = s.getPhaseDiff(lambda,r);
+peaksDiff = getPhaseShift(peakVal,lambda);
+dPhase = [peaksDiff, peakPos];
+
+figure(3)
+hold on; grid on
+plot(phaseDiff(:,1),phaseDiff(:,2),'b')
+plot(peakPos,peaksDiff,'*')
 
 
-% 
-% 
-% function [peakVal2,peakPos2,nrPeaks] = findPeaks(coords,vals,threshold,minSpace)
-% maxVal = max(vals);
-% edgeP = [coords(1),coords(end)];
-% edgeV = [vals(1), vals(end)];
-% coords = coords(vals > maxVal*threshold);
-% vals = vals(vals > maxVal*threshold);
-% 
-% peakVal = zeros(length(coords),1); peakVal(:) = nan;
-% peakPos = zeros(length(coords),1); peakPos(:) = nan;
-% y1 = vals(1);
-% for ind = 2:length(coords)-1
-%     y2 = vals(ind);
-%     y3 = vals(ind + 1);
-%     if y1 < y2 && y3 < y2
-%         peakVal(ind) = y2;
-%         peakPos(ind) = coords(ind);
-%     elseif ind == length(coords)-1 && y3 > y2        
-%         peakVal(ind+1) = y3;
-%         peakPos(ind+1) = coords(ind+1);
-%     end
-%     y1 = y2;
-% end
-% 
-% peakVal = peakVal(~isnan(peakVal));
-% peakPos = peakPos(~isnan(peakPos));
-% 
-% peakVal2 = zeros(length(peakVal),1); peakVal2(:) = nan;
-% peakPos2 = zeros(length(peakVal),1); peakPos2(:) = nan;
-% endoflist = 0;
-% startind = 1;
-% peakind = 1;
-% while ~endoflist
-%     testList = zeros(length(peakVal),2).*nan;
-%     x0 = peakPos(startind);
-%     v0 = peakVal(startind);
-%     testList(startind,:) = [x0,v0];
-%     for ind = startind+1:length(peakVal)
-%         x1 = peakPos(ind);
-%         v = peakVal(ind);
-%         d = abs(x1-x0);
-%         if d < minSpace
-%             testList(ind,:) = [x1,v];
-%             x0 = x1;
-%         else
-%             startind = ind;
-%             break
-%         end
-%     end
-%     
-%     [maxVal,indl] = max(testList(:,2));
-%     peakVal2(peakind) = maxVal;
-%     peakPos2(peakind) = testList(indl,1);
-%     peakind = peakind + 1;
-%     if ind == length(peakVal)
-%         if startind == ind
-%             x0 = peakPos(startind);
-%             v0 = peakVal(startind);            
-%             peakVal2(peakind) = v0;
-%             peakPos2(peakind) = x0;
-%         end
-%         break
-%     end
-% end
-% 
-% 
-% peakVal2 = peakVal2(~isnan(peakVal2));
-% peakPos2 = peakPos2(~isnan(peakPos2));
-% peakVal2 = [edgeV(1); peakVal2; edgeV(end)];
-% peakPos2 = [edgeP(1); peakPos2; edgeP(end)];
-% 
-% nrPeaks = length(peakPos2);
-% end
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Create a new source with the peak positions and trace. This is to be used
+% as a comarison to the aproximation trace.
 
-% %% This part is for visualization and creating the phase shift plots
+testS = source2d_variable_spacing([peakPos(2:end),ones(peaksN-1,1)*1.2*r],[0,-1],n0);
 
-% % Tried to make a function to find the peaks.
-% % Did not work du to a bit crazy data. Have to do it manualy yyaaay....(sarcasm)
-% % 
-% function [peakVal,peakPos] = findPeaks(coords,vals)
-% peakVal = zeros(length(coords),1); peakVal(:) = nan;
-% peakPos = zeros(length(coords),1); peakPos(:) = nan;
-% y1 = vals(1);
-% for ind = 2:length(coords)-1
-%     y2 = vals(ind);
-%     y3 = vals(ind + 1);
-%     if y1 < y2 && y3 < y2
-%         peakVal(ind) = y2;
-%         peakPos(ind) = coords(ind);
-%     end
-%     y1 = y2;
-% end
-% peakVal = peakVal(~isnan(peakVal));
-% peakPos = peakPos(~isnan(peakPos));
-% end
+steps = 10^3;
+runge_kutta_trace_known_gradient(testS,steps,'parabolic',n0,n1,r);
+testS.getBacktrace(0);
+% Plot result
+figure(4)
+hold on; axis equal; grid on
+title('Runge-Kutta ray-trace')
+plotCircle(r,2*pi,4)
+plotLine([-1.2*r 0],[1.2*r 0],'k',4)
+plotLine([0 -1.2*r],[0 1.2*r],'k',4)
+testS.plotTrace(4,'r')
+testS.plotBacktrack(4)
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Function used to get the phase shift from the peaks
+function peaksDiff = getPhaseShift(peakVal,lambda)
+halfsteps = (0:1:(length(peakVal)-2))./2.*lambda;
+if peakVal(end-1) > 0.9
+    p = halfsteps(end) + (1-peakVal(end))*lambda/2;
+elseif peakVal(end-1) < 0.1
+    p = halfsteps(end) + peakVal(end)*lambda/2;
+else
+    % If the value is here there is some sort of error
+    disp('Error in getting the phase shift profile')
+end
+peaksDiff = [halfsteps';p];
+end
 
-% xp = linspace(0,1,100);
-% lambda = 5*10^-7;
-% shift = xp.*lambda;
-% phaseFunc = @(x) (cos(x*2*pi/lambda - pi) + 1)/2;
-% dp = phaseFunc(shift);
-% 
-% figure(1)
-% plot(xp,dp)
+

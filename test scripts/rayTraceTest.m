@@ -3,15 +3,15 @@
 
 % Create GRIN
 grinRange = [1.3,1.45];
-grin = GRIN2d(0.01,'parabolic','matrix',1.3,grinRange);
+grin = GRIN2d(0.001,'parabolic','matrix',1.3,grinRange);
 % grin.plot_nIndex
 % % Create source
 start = [0,2];
 v = [0,-1];
-rayNr = 4;
-sourceWidth = 4;
+rayNr = 20;
+sourceWidth = 2.2;
 n_source = 1.3;
-s2 = source2d(start,v, rayNr, sourceWidth, n_source);
+s2 = source2d(start,v, rayNr, sourceWidth, n_source,'half');
 
 % % Testplot source and grin
 % figure(2)
@@ -22,7 +22,7 @@ s2 = source2d(start,v, rayNr, sourceWidth, n_source);
 tic
 % halfstop = true;
 stopLine = -1;
-rayTrace2dGRIN_parallel(s2,grin,0.01,stopLine);
+rayTrace2dGRIN_parallel(s2,grin,0.001,stopLine);
 % rayTrace2d_homogenious(s)
 % % rayTrace2dGRIN(s,grin,0.001,halfstop);
 toc

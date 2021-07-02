@@ -11,6 +11,8 @@ classdef source2d_variable_spacing < handle
         nStart = 1; % Refractive index of start medium
         totalPath = [];
         OP = [];    % Optical path length
+        phase = [];
+        backTrace = [];
         phasePath = {};
         minR = [];
     end
@@ -26,6 +28,9 @@ classdef source2d_variable_spacing < handle
             this.nStart = refractiveIndex;
             this.OP = zeros(this.nRays,1);
             this.phasePath = zeros(this.nRays,1);
+            this.phase = zeros(this.nRays,1);
+            this.totalPath = zeros(this.nRays,1);
+            this.backTrace = zeros(this.nRays,2);
         end
         
         function plotP(this,figureNr)
@@ -49,11 +54,11 @@ classdef source2d_variable_spacing < handle
             grid on
         end
         
-        function plotTrace(this, figureNr)
+        function plotTrace(this, figureNr,color)
             figure(figureNr)
             for rayInd = 1:this.nRays
                 if ~isempty(this.PT{rayInd})
-                    plot(this.PT{rayInd}(:,1),this.PT{rayInd}(:,2),'r')
+                    plot(this.PT{rayInd}(:,1),this.PT{rayInd}(:,2),color)
                 end
             end
         end
@@ -92,6 +97,24 @@ classdef source2d_variable_spacing < handle
             this.PT = cell(this.nRays,1);
             this.OP = zeros(this.nRays,1);
             this.phasePath = zeros(this.nRays,1);
+        end
+        
+        function [backTrace] = getBacktrace(this,backLine)
+            for rayInd = 1:this.nRays
+                t = (backLine - this.P(rayInd,2))/this.V(rayInd,2);
+                px = this.P(rayInd,1) + t*this.V(rayInd,1);
+                this.backTrace(rayInd,:) = [px,backLine];
+            end
+            backTrace = this.backTrace;
+        end
+        function plotBacktrack(this,figureNr)
+            figure(figureNr)
+            hold on, axis equal
+            for rayInd = 1:this.nRays
+%                 t = (stopLine - this.P(rayInd,2))/this.V(rayInd,2);
+%                 px = this.P(rayInd,1) + t*this.V(rayInd,1);
+                plot([this.P(rayInd,1);this.backTrace(rayInd,1)],[this.P(rayInd,2);this.backTrace(rayInd,2)],'--b')
+            end
         end
     end
 end

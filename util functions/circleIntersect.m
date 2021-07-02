@@ -17,7 +17,7 @@ end
 thc = sqrt(r^2-d^2);
 t0 = tca - thc;
 t1 = tca + thc;
-p1 = p0 + t0*v;
-p2 = p0 + t1*v;
+p1 = p0 + t0.*v;
+p2 = p0 + t1.*v;
 intersect = 1;
 end

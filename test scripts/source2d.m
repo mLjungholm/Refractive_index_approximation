@@ -13,22 +13,31 @@ classdef source2d < handle
         OP = [];    % Optical path length
         phase = [];
         backTrace = [];
-        vPath = {};
         nPath = {};
+        diviation = {};
+        stepError = {};
     end
     methods
-        function this = source2d(startP,startV, nRays, sWidth,refractiveIndex)
+        function this = source2d(startP,startV, nRays, sWidth,refractiveIndex,halfside)
             this.nRays = nRays;
             this.sWidth = sWidth;
             this.V = ones(nRays,2).*startV;
             this.ended = zeros(nRays,1);
             this.PT = cell(nRays,1);
-            this.vPath = cell(nRays,1);
-            this.nPath = cell(nRays,1);
             this.nStart = refractiveIndex;
             this.OP = zeros(nRays,1);
             this.phase = zeros(nRays,1);
-            rg = linspace(-sWidth/2,sWidth/2,nRays);
+            this.totalPath = zeros(nRays,1);
+            this.diviation = cell(nRays,1);
+            this.stepError = cell(nRays,1);
+            this.nPath = cell(nRays,1);
+            
+            % Set starting positions
+            if isequal(halfside,'half')
+                rg = linspace(0,sWidth/2,nRays);
+            else
+                rg = linspace(-sWidth/2,sWidth/2,nRays);
+            end
             this.P = ones(nRays,2).*startP;
             this.P(:,2) = this.P(:,2)+rg';          
             theta = -acos(startV(1)./sqrt(startV(1)^2+startV(2)^2));
@@ -120,20 +129,23 @@ classdef source2d < handle
         
         function phaseShift = getPhaseShiftValues(this,lambda,r,xRange)
             phaseShift = this.phase.*r;
-            phasePos = this.backTrace(:,1);
-            phasePos = phasePos(phaseShift > 0);
-            phaseShift = phaseShift(phaseShift > 0);
+            phasePos = this.backTrace(:,1);        
             phaseShift = phaseShift(phasePos > xRange(1));
             phasePos = phasePos(phasePos > xRange(1));
-            phasePos = phasePos.*r;            
-%             phaseShift = phaseShift(phasePos > xRange(1));
-%             phasePos = phasePos(phasePos > xRange(1));
-%             phaseShift = phaseShift(phasePos < xRange(2));
-%             phasePos = phasePos(phasePos < xRange(2));
-%             phasePos = phasePos.*r;
+            phaseShift = phaseShift(phasePos < xRange(2));
+            phasePos = phasePos(phasePos < xRange(2));
+            phasePos = phasePos.*r;
             phaseFunc = @(x) (cos(x*2*pi/lambda + pi) + 1)/2;
             phaseShift = [phaseFunc(phaseShift),phasePos];
             phaseShift = sortrows(phaseShift,2);
+        end
+        
+        function phaseDiff = getPhaseDiff(this,lambda,r)
+            pD1 = this.backTrace(:,1); 
+            pD2 = this.phase;
+            pD2 = pD2(pD1 <= 1).*r;
+            pD1 = pD1(pD1 <= 1).*r;
+            phaseDiff = [pD1 pD2];
         end
     end
 end
