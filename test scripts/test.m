@@ -1,25 +1,10 @@
 close all
 
-r0 = 3;
-r1 = 2;
-n0 = 1;
-ns = 1.2;
+na = 1.3;
+nb = 1.4;
+thetaA = 0:0.1:90;
 
-% A = r1^2/2;
-% B = r0^2/2;
-% 
-% C = r1;
-% D = r0;
-% 
-% E = A-B;
-% F = C-D;
-
-A = [(r0^2)/2-(r1^2)/2 r0-r1; r0 1];
-B = [ns; n0];
-
-X = linsolve(A,B);
-
-nFunc = @(r) X(1)*r + X(2);
-
-nFunc(r0)
-nFunc(r1)
+figure(4)
+thetaB = asind(na/nb*sind(thetaA));
+psi = thetaA - thetaB;
+plot(thetaA,psi)

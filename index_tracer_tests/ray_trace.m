@@ -1,4 +1,4 @@
-function meggit_trace(s,ds,n0,n1,rs,nProfile,stepFunc)
+function ray_trace(s,ds,n0,n1,rs,nProfile,stepFunc)
 steps = round(rs/ds);
 for i = 1:s.nRays
     rayPath = zeros(steps*2,2).*nan;
@@ -20,7 +20,24 @@ for i = 1:s.nRays
                 if r1 > rs
                     exitflag = 1;
                 end
-                rayPath(step,:) = p1;
+                rayPath(step+1,:) = p1;
+                phase = phase + norm(p1-p0)*(np-n0);
+                totalPath = totalPath + d;
+                diviation(step) = alpha;
+                stepError(step) = dserr;
+                rn(step) = np;
+                p0 = p1;
+                v0 = v1;
+                step = step + 1;
+            end
+        case 'megg_diff'
+            while ~exitflag && step < steps*2
+                [p1,v1,alpha,dserr,np,d] = meggit_diff_step(ds,p0,v0,n0,n1,rs,nProfile);
+                r1 = norm(p1);
+                if r1 > rs
+                    exitflag = 1;
+                end
+                rayPath(step+1,:) = p1;
                 phase = phase + norm(p1-p0)*(np-n0);
                 totalPath = totalPath + d;
                 diviation(step) = alpha;
@@ -37,7 +54,7 @@ for i = 1:s.nRays
                 if r1 > rs
                     exitflag = 1;
                 end
-                rayPath(step,:) = p1;
+                rayPath(step+1,:) = p1;
                 phase = phase + norm(p1-p0)*(np-n0);
                 totalPath = totalPath + d;
                 diviation(step) = alpha;
@@ -54,7 +71,7 @@ for i = 1:s.nRays
                 if r1 > rs
                     exitflag = 1;
                 end
-                rayPath(step,:) = p1;
+                rayPath(step+1,:) = p1;
                 phase = phase + norm(p1-p0)*(np-n0);
                 totalPath = totalPath + d;
                 diviation(step) = alpha;
@@ -70,5 +87,6 @@ for i = 1:s.nRays
     s.totalPath(i) = totalPath;
     s.stepError{i} = stepError;
     s.nPath{i} = rn;
+    s.phase(i) = phase;
 end
 end

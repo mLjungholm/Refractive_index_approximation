@@ -14,19 +14,35 @@ switch nProfile
         n = @(r) n0 + k*(1-sing(r-rn)/2);
         D = @(r) 0;
     case 'eliptical'
-        %ignore for now
+        k = (n1-n0)/rn;
+        n = @(r) k*sqrt(rn^2 - r(1)^2 - r(2)^2) + n0;
+%         dndr = @(r) -k/sqrt(rn^2 - r(1)^2 - r(2)^2).*[r(1) r(2)];
+        D = @(r) -(k*sqrt(rn^2 - r(1)^2 - r(2)^2) + n0).*k./sqrt(rn^2 - r(1)^2 - r(2)^2).*[r(1) r(2)];
+    case 'luneburg'
+        R = rn;
+        n = @(r) sqrt(2-(r(1)^2 + r(2)^2)/R^2);
+%         dndr = @(r) -1/sqrt(2-(x^2 + y^2)/R^2)/R^2.*[x y];
+        D = @(r) -1/R^2.*[r(1) r(2)];
 end
 
-A = ds.*D(p0);
-B = ds.*D(p0 + ds/2.*v0 + ds/8.*A);
-C = ds.*D(p0 + ds.*v0 + ds/2.*B);
-p1 = p0 + ds.*(v0 + 1/6.*(A + 2.*B));
-v1 = v0 + 1/6.*(A + 4.*B + C);
-v1 = v1./sqrt(v1(1)^2 + v1(2)^2);
-
-alpha = acos(dot(v1,v0));
+A = real(ds.*D(p0));
+if abs(A(1)) > 1
+    v1 = v0;
+    p1 = p0 + ds.*v1;
+else
+    B = real(ds.*D(p0 + ds/2.*v0 + ds/8.*A));
+    C = real(ds.*D(p0 + ds.*v0 + ds/2.*B));
+    p1 = p0 + ds.*(v0 + 1/6.*(A + 2.*B));
+%     if ~isreal(p1)
+%         testflag = 1;
+%     end
+    v1 = v0 + 1/6.*(A + 4.*B + C);
+%     v1 = v1./sqrt(v1(1)^2 + v1(2)^2);
+%     p1 = p0 + ds.*v1;
+end
+alpha = acos(dot(v1,v0)./(norm(v1)*norm(v0)));
 d = norm(p0-p1);
-dserr = (d-ds)/ds*100;
+dserr = abs((d-ds)/ds)*100;
 np = n(p0);
 % fprintf('The ds step error in "Runge-Kutta" is: %.4f %% \n',dserr)
 end

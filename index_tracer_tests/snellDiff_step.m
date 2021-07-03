@@ -26,12 +26,17 @@ na = n(ra);
 nb = n(rb);
 
 dv = dot(v0,gV);
-b = -sign(dv);
-theta = acos(dv);
 if dv < 0
-theta = theta -pi/2;
+    gV = -gV;
 end
-a = na/nb*sin(theta);
+
+theta = acos(dv);
+
+
+% if dv < 0
+% theta = theta -pi/2;
+% end
+% a = na/nb*sin(theta);
 if theta == 0
     v1 = v0;
     p1 = p0 + ds.*v0;

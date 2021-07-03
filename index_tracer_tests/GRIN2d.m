@@ -32,10 +32,10 @@ classdef GRIN2d < handle
             switch gradient_type
                 case 'linear'
                     % Linear space: n = 1.5 - r;  r[0,1]
-                    nScale = this.grinRange(2)-this.grinRange(1);
-                    this.P = (nScale.*sqrt(this.X.^2 + this.Y.^2)*-1 + this.grinRange(2)).*mask;
+                    nScale = this.grinRange(1)-this.grinRange(2);
+                    this.P = (nScale.*sqrt(this.X.^2 + this.Y.^2) + this.grinRange(2)).*mask;
                     this.P(isnan(this.P)) = this.grinRange(1);
-                case 'Circular'
+                case 'eliptical'
                     % parabolic space: n = sqrt(1-r^2) + 1;  r[0,1]
                     nScale = this.grinRange(2)-this.grinRange(1);
                     r = sqrt(this.X.^2 + this.Y.^2).*mask;
@@ -47,13 +47,21 @@ classdef GRIN2d < handle
                     this.P = 1.5.*mask;
                     this.P(isnan(this.P)) = 1;
                 case 'parabolic'
-                    k = this.grinRange(1)-this.grinRange(2);
+                    k = (this.grinRange(1)-this.grinRange(2));
                     r = sqrt(this.X.^2 + this.Y.^2).*mask;
                     this.P = k.*r.^2 + this.grinRange(2);
                     this.P(isnan(this.P)) = this.grinRange(1);
+                case 'luneburg'
+%                     R = 1;
+                    r = sqrt(this.X.^2 + this.Y.^2).*mask;
+                    this.P = sqrt(2-r.^2);
+                    this.P(isnan(this.P)) = 1;
+                    %         dndr = @(r) -1/sqrt(2-(x^2 + y^2)/R^2)/R^2.*[x y];
+%                     D = @(r) -1/R^2.*[r(1) r(2)];
                 otherwise
                     disp('Error: Not valid type')
                     this.P = nan;
+                    
             end
             
             switch data_format
