@@ -5,13 +5,24 @@ switch gradient_type
         k = (n0-n1)/r0^2;
         n = @(r) k*(r(1)^2 + r(2)^2) + n1;
         D = @(r) 2*k*(k*(r(1)^2 + r(2)^2) + n1).*[r(1) r(2)];
-%         D = @(r) 2*k.*[k.*(r(1)^3 + r(1)*r(2)^2) + n1*r(1);
-%             k.*(r(2)^3 + r(2)*r(1)^2) + n1*r(2)];
     case 'linear'
         k = (n0-n1)/r0;
         n = @(r) k*sqrt(r(1)^2 + r(2)^2) + n1;
-        D = @(r) k*(k + m/sqrt(r(1)^2 + r(2)^2)).*[r(1) r(2)];
-        
+        D = @(r) k*(k + n1/sqrt(r(1)^2 + r(2)^2)).*[r(1) r(2)];
+    case 'step'
+        k = n1-n0;
+        n = @(r) n0 + k*(1-sing(r-rn)/2);
+        D = @(r) 0;
+    case 'eliptical'
+        k = (n1-n0)/r0;
+        n = @(r) k*sqrt(rn^2 - r(1)^2 - r(2)^2) + n0;
+%         dndr = @(r) -k/sqrt(rn^2 - r(1)^2 - r(2)^2).*[r(1) r(2)];
+        D = @(r) -(k*sqrt(rn^2 - r(1)^2 - r(2)^2) + n0).*k./sqrt(rn^2 - r(1)^2 - r(2)^2).*[r(1) r(2)];
+    case 'luneburg'
+        R = r0;
+        n = @(r) sqrt(2-(r(1)^2 + r(2)^2)/R^2);
+%         dndr = @(r) -1/sqrt(2-(x^2 + y^2)/R^2)/R^2.*[x y];
+        D = @(r) -1/R^2.*[r(1) r(2)];
 end
 
 arrayfun(@trace_ray,1:s.nRays);
@@ -65,6 +76,6 @@ arrayfun(@trace_ray,1:s.nRays);
         C = ds.*D(p0 + ds.*v0 + ds/2.*B);
         p1 = p0 + ds.*(v0 + 1/6.*(A + 2.*B));
         v1 = v0 + 1/6.*(A + 4.*B + C);
-        v1 = v1./sqrt(v1(1)^2 + v1(2)^2);
+%         v1 = v1./sqrt(v1(1)^2 + v1(2)^2);
     end
 end

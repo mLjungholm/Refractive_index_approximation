@@ -7,29 +7,32 @@ close all
 % Source parameters
 v = [0;-1];
 p = [0;1.2];
-nRays = 1000;
+nRays = 10;
 width = 2.2;
 n0 = 1.3;
-n1 = 1.45;
-% r = 1;
-
+n1 = 1.4;
+r = 1;
+% nProfile = 'parabolic';
+nProfile = 'luneburg';
 % Initiate source
 s = source2d(p', v', nRays, width, n0, 'half');
-
+s2 = source2d(p', v', nRays, width, n0, 'half');
 % Initiate ray trace
 ds = 10^3;
 tic
-runge_kutta_trace_known_gradient(s,ds,'parabolic',n0,n1,1)
+runge_kutta_trace_known_gradient(s,ds,nProfile,n0,n1,r)
 toc
+meggitMeyer_rayTrace_known_gradient(s2,r,ds,[n0 n1])
 
 % Plot result
-% figure(1)
-% hold on; axis equal; grid on
-% title('Runge-Kutta ray-trace')
-% plotCircle(1,2*pi,1)
-% plotLine([-1.2 0],[1.2 0],'k',1)
-% plotLine([0 -1.2],[0 1.2],'k',1)
-% s.plotTrace(1,'r')
+figure(1)
+hold on; axis equal; grid on
+title('Runge-Kutta ray-trace')
+plotCircle(1,2*pi,1)
+plotLine([-1.2 0],[1.2 0],'k',1)
+plotLine([0 -1.2],[0 1.2],'k',1)
+s.plotTrace(1,'r')
+s2.plotTrace(1,'b')
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

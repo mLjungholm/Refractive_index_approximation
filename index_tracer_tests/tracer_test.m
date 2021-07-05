@@ -8,7 +8,7 @@ n1 = 1.4;
 % nProfile = 'eliptical';
 nProfile = 'luneburg';
 nRays = 2;
-steps = 10^6;
+steps = 10^4;
 ds = rs/steps;
 width = rs;
 % half = 'half';
@@ -17,9 +17,9 @@ half = 0;
 % g = GRIN2d(rs/10^3,nProfile,'matrix',n0,[n0 n1]);
 
 s_megg = source2d(p0,v0, nRays, width,n0,half);
-% s_megg_diff = source2d(p0,v0, nRays, width,n0,'half');
-s_rk = source2d(p0,v0, nRays, width,n0,half);
-% s_snell = source2d(p0,v0, nRays, width,n0,'half');
+% s_megg_diff = source2d(p0,v0, nRays, width,n0,half);
+% s_rk = source2d(p0,v0, nRays, width,n0,half);
+% s_megg2 = source2d(p0,v0, nRays, width,n0,half);
 % s_grin = source2d(p0,v0, nRays, width,n0,half);
 
 tic
@@ -31,11 +31,11 @@ toc
 % toc
 
 tic
-ray_trace(s_rk,ds,n0,n1,rs,nProfile,'rk')
+% ray_trace(s_rk,ds,n0,n1,rs,nProfile,'rk')
 toc
 
 % tic 
-% ray_trace(s_snell,ds,n0,n1,rs,nProfile,'snell')
+% meggitMeyer_rayTrace_known_gradient(s_megg2,rs,steps,[n0 n1],nProfile)
 % toc
 
 % tic
@@ -49,8 +49,9 @@ plotCircle(rs,2*pi,1)
 plotLine([-rs 0], [rs, 0],'k',1)
 plotLine([0,-rs], [0,rs],'k',1)
 s_megg.plotTrace(1,'r')
-% s_megg_diff.plotTrace(1,'m')
-s_rk.plotTrace(1,'b')
+% s_megg2.plotTrace(1,'m')
+% s_megg_diff.plotTrace(1,'y')
+% s_rk.plotTrace(1,'b')
 % s_snell.plotTrace(1,'g')
 % s_grin.plotTrace(1,'k')
 

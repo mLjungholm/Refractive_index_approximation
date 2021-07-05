@@ -20,9 +20,11 @@ switch nProfile
         D = @(r) -(k*sqrt(rn^2 - r(1)^2 - r(2)^2) + n0).*k./sqrt(rn^2 - r(1)^2 - r(2)^2).*[r(1) r(2)];
     case 'luneburg'
         R = rn;
-        n = @(r) sqrt(2-(r(1)^2 + r(2)^2)/R^2);
-%         dndr = @(r) -1/sqrt(2-(x^2 + y^2)/R^2)/R^2.*[x y];
-        D = @(r) -1/R^2.*[r(1) r(2)];
+%         n = @(r) sqrt(2-(r(1)^2 + r(2)^2)/R^2);
+        %         dndr = @(r) -1/sqrt(2-(x^2 + y^2)/R^2)/R^2.*[x y];
+        %         D = @(r) -1/R^2.*[r(1) r(2)];
+        n = @(r) sqrt(2-r^2/R^2);
+        D = @(r) -1/R^2.*r;
 end
 
 A = real(ds.*D(p0));

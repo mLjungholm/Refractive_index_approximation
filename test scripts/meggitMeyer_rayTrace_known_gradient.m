@@ -1,11 +1,28 @@
-function meggitMeyer_rayTrace_known_gradient(s,r,steps,nRange)
+function meggitMeyer_rayTrace_known_gradient(s,r,steps,nRange,nProfile)
 nRays = s.nRays;
 ds = r*2/steps;
 maxSteps = steps*2;
 n0 = nRange(1);
 n1 = nRange(2);
-k = (n0-n1);
-nFunc = @(x) k.*x.^2 + n1; 
+switch nProfile
+    case 'luneburg'
+        nFunc = @(x) sqrt(2-x^2/r^2);
+    case 'linear'
+        k = (n0-n1);
+        nFunc = @(x) k.*x + n1;
+    case 'parabolic'
+        k = (n0-n1);
+        nFunc = @(x) k.*x.^2 + n1;
+    case 'eliptical'
+        k = (n1-n0)/r;
+        nFunc = @(x) k*sqrt(r^2 - x^2) + n0;
+%         dndr = @(r) -r*k/sqrt(rn^2 - r^2);
+end
+
+
+
+
+
 arrayfun(@traceRay,1:s.nRays);
 
 % function itterativeTrace_singleGradient(s,r,steps)
@@ -44,7 +61,7 @@ end
         rayPath = [];
         exitVol = 0;
         rayPath = zeros(maxSteps,2);  % Create new path vector
-        vPath = rayPath.*nan;
+%         vPath = rayPath.*nan;
         nPath = rayPath.*nan;
         rayPath(:,1) = nan; rayPath(:,2) = nan;
         rayPath(1,:) = s.P(rayInd,:);   % Set origin point
@@ -56,7 +73,7 @@ end
         v0 = v0./sqrt(v0(1)^2 + v0(2)^2);
         p0 = rayPath(rayStep,:);        % Current point
         r0 = sqrt(p0(1)^2 + p0(2)^2);   % Current distance from center.
-        vPath(1,:) = v0;
+%         vPath(1,:) = v0;
         nPath(1) = n0;
         % Run untill threshold is met or max itterations are reached
         while ~exitVol && rayStep < maxSteps
@@ -64,7 +81,7 @@ end
             %             sN = sN./sqrt(sN(1)^2 + sN(2)^2);
             %             theta = acos(sN(1)*v0(1) + sN(2)*v0(2));
             %             rn = ((n0 + n1)/2) / (sin(theta)*(n1-n0));
-            vPath(rayStep,:) = v0;
+%             vPath(rayStep,:) = v0;
             nPath(rayStep) = nFunc(r0);
             rn = getLocalRadiusKnownGradient(p0,v0,r0);
             [p1,v1] = curvePath(p0,v0,rn,ds); % Move one integration distance           
@@ -94,7 +111,7 @@ end
         end
         s.PT{rayInd} = rayPath;
         s.nPath{rayInd} = nPath;
-        s.vPath{rayInd} = vPath;
+%         s.vPath{rayInd} = vPath;
         s.phase(rayInd) = phaseSum;
         s.P(rayInd,:) = p0;
         s.V(rayInd,:) = v0;
@@ -110,8 +127,8 @@ sN = sN./sqrt(sN(1)^2 + sN(2)^2);
 % rs = sqrt(p(1)^2 + p(2)^2);
 % ns = nFunc(rs);
 dn = nFunc(r0);
-% na = nFunc(r0 + ds/2);
-% nb = nFunc(r0 - ds/2);
+na = nFunc(r0 + ds/2);
+nb = nFunc(r0 - ds/2);
 % if na == 1
 %     D = norm(p-sN.*ds) - 1;
 % else
@@ -121,7 +138,7 @@ dn = nFunc(r0);
 % D = sqrt(r0^2 + r1^2);
 theta = acos(sN(1)*v(1) + sN(2)*v(2));
 % r = ((na + nb)/2) / (sin(theta)*((nb-na)/(D)));
-r = (dn) / (sin(theta)*(-2*k*r0)*2);
+r = (dn) / (sin(theta)*((nb-na)/ds));
 test = 1;
 end
 end

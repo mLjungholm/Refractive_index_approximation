@@ -18,11 +18,15 @@ switch nProfile
         k = n1-n0;
         n = @(r) n0 + k*(1-sing(r-rn)/2);
         dndr = @(r) 0;
+    case 'luneburg'
+        R = rn;
+        n = @(r) sqrt(2-r^2/R^2);
+        dndr = @(r) -r/sqrt(2-r^2/R^2)/R^2;
 end
 
 r0 = norm(p0);
-gV = -p0;
-theta = acos(dot(v0,gV));
+gV = -p0./r0;
+theta = acos(dot(v0,gV)./norm(v0));
 ra = r0 + ds/2;
 rb = r0 - ds/2;
 na = real(n(ra));

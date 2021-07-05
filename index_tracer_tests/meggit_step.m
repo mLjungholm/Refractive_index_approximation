@@ -25,8 +25,8 @@ switch nProfile
 end
 
 r0 = norm(p0);
-gV = -p0;
-theta = acos(dot(v0,gV));
+gV = -p0./r0;
+theta = acos(dot(v0,gV)/norm(v0));
 r = n(r0)/(sin(theta) * -dndr(r0));
 if r == 0
     v1 = v0;
