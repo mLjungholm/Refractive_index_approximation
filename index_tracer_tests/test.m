@@ -64,28 +64,44 @@
 % % ylabel('Y - axis')
 % 
 % 
-x = linspace(0,1/sqrt(2),100);
-y = linspace(0,1/sqrt(2),100);
-r = sqrt(x.^2 + y.^2);
-
-
-n0 = 1.2;
-n1 = 1.5;
-k = n0-n1;
-n = @(x,y) k.*sqrt(x.^2 + y.^2) + n1;
-dndr = @(x,y) k./sqrt(x.^2 + y.^2).*[x y];
-dif = dndr(x',y');
-sqrt(dif(2,1)^2 + dif(2,2)^2)
-% dif = dif.*n(x',y');
+% x = linspace(0,1/sqrt(2),100);
+% y = linspace(0,1/sqrt(2),100);
+% r = sqrt(x.^2 + y.^2);
 % 
 % 
-syms x y
-ds = 0.1;
-n = k.*sqrt(x^2 + y^2) + n1;
-g = gradient(n,[x,y]);
+% n0 = 1.2;
+% n1 = 1.5;
+% k = n0-n1;
+% n = @(x,y) k.*sqrt(x.^2 + y.^2) + n1;
+% dndr = @(x,y) k./sqrt(x.^2 + y.^2).*[x y];
+% dif = dndr(x',y');
+% sqrt(dif(2,1)^2 + dif(2,2)^2)
+% % dif = dif.*n(x',y');
+% % 
+% % 
+% syms x y
+% ds = 0.1;
+% n = k.*sqrt(x^2 + y^2) + n1;
+% g = gradient(n,[x,y]);
+% 
+% [X, Y] = meshgrid(ds:ds:1,ds:ds:1);
+% G1 = subs(g(1),[x y],{X,Y});
+% G2 = subs(g(2),[x y],{X,Y});
+% quiver(X,Y,G1,G2)
 
-[X, Y] = meshgrid(ds:ds:1,ds:ds:1);
-G1 = subs(g(1),[x y],{X,Y});
-G2 = subs(g(2),[x y],{X,Y});
-quiver(X,Y,G1,G2)
+r = 0:0.01:1;
+R = 1;
+% k = 1;
+n0 = 0;
+% n1 = sqrt(2);
+n1 = 1;
+k = n1-n0;
+% dndr = @(r) -r./sqrt(2-r.^2./R^2)./R^2;
+n = @(r) sqrt(2 - r.^2./R^2);
+n2 = @(r) k.*sqrt(1 - r.^2./R^2) + n0;
+
+figure(1); hold on; grid on;
+plot(r,n(r),'b')
+plot(r,n2(r),'m')
+
 

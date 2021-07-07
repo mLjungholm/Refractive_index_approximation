@@ -147,6 +147,17 @@ classdef source2d < handle
             pD1 = pD1(pD1 <= 1).*r;
             phaseDiff = [pD1 pD2];
         end
+        
+        function [phase,totalPath,v,p] = getEndVals_single(this,rayInd,printval)
+            phase = this.phase(rayInd);
+            totalPath = this.totalPath(rayInd);
+            v = this.V(rayInd,:);
+            p = this.P(rayInd,:);
+            if isequal(printval,'print')
+                fprintf('V = [%.6f, %.6f], P = [%.6f, %.6f], Total phase = %.4f, Total path = %.4f \n',v(1),v(2),p(1),p(2),phase,totalPath)
+            end
+        end
+        
     end
 end
 

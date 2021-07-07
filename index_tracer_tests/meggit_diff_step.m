@@ -2,14 +2,14 @@
 
 function [p1,v1,alpha,dserr,np,d] = meggit_diff_step(ds,p0,v0,n0,n1,rn,nProfile)
 switch nProfile
-    case 'linear'
-        k = (n0-n1)/rn;
-        n = @(r) k*r + n1;
-        dndr = @(r) k;
     case 'parabolic'
         k = (n0-n1)/rn^2;
         n = @(r) k*r^2 + n1;
         dndr = @(r) 2*k*r;
+    case 'linear'
+        k = (n0-n1)/rn;
+        n = @(r) k*r + n1;
+        dndr = @(r) k;
     case 'eliptical'
         k = (n1-n0)/rn;
         n = @(r) k*sqrt(rn^2 - r^2) + n0;
@@ -31,9 +31,8 @@ ra = r0 + ds/2;
 rb = r0 - ds/2;
 na = real(n(ra));
 nb = real(n(rb));
-% r = ((na+nb)/2)/(sin(theta) * (nb-na)/ds);
+% r = ((n0+n1)/2)/(sin(theta) * (nb-na)/ds);
 r = ((na+nb)/2)/(sin(theta) * (nb-na)/ds);
-test = (nb-na)/ds;
 if r == 0
     v1 = v0;
     p1 = p0 + ds.*v1;

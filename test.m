@@ -1,102 +1,230 @@
-u = [0 -1];
-v = [-1 -1];
-acosd(dot(u,v)/(norm(u)*norm(v)))
+n0 = 1;
+n1 = 1.5;
+k = n0-n1;
+dt = 0.01;
+v0 = [0 -1];
 
-% % x = linspace(0,1,1000);
-% % tline1 = grin.dX(1000,1000:end);
-% % xline = grin.X(1000,1000:end);
-% % tline2 = 2.*k.*x;
+x = -1:ds:1;
+y = 1:-ds:-1;
+inds = length(x);
+
+psi_rk = zeros(inds);
+
+for xi = 1:inds
+    for yi = 1:inds
+        psi_rk(yi,xi) = getDeflection_RK(x(xi),y(yi),v0,ds,n0,n1);
+    end
+end
+
+close all
+figure(1)
+imagesc(psi_rk)
+title('Deflection [rads] Runge-Kutta')
+
+ds = 0.1;
+x = -1:ds:1;
+y = 1:-ds:-1;
+inds = length(x);
+
+% psi_mg = getDeflection_MG(1,0,v0,ds,n0,n1);
+
+psi_mg = zeros(inds);
+for xi = 1:inds
+    for yi = 1:inds
+        psi_mg(yi,xi) = getDeflection_MG(x(xi),y(yi),v0,ds,n0,n1);
+    end
+end
+
+figure(2)
+imagesc(psi_mg)
+title('Deflection [rads] Meggit')
+
+
+
+function psi = getDeflection_RK(x,y,v0,dt,n0,n1)
+k = n0-n1;
+n = @(x,y) k.*sqrt(x.^2 + y.^2) + n1;
+nDivn = @(R) (k.*sqrt(R(1).^2 + R(2).^2) + n1).*k./sqrt(R(1).^2 + R(2).^2).*[R(1) R(2)];
+T = v0.*n(x,y);
+A1 = dt.*nDivn([x,y]);
+A2 = dt.*nDivn([x,y] + dt/2.*T +dt/8.*A1);
+A3 = dt.*nDivn([x,y] + dt.*T +dt/2.*A2);
+T1 = T + 1/6.*(A1 + 4.*A2 + A3);
+v1 = T1./n(x,y);
+psi = acos((v0(1)*v1(1) + v0(2)*v1(2))./norm(v1)./norm(v0));
+end
+
+
+function psi = getDeflection_MG(x,y,v0,ds,n0,n1)
+k = n0-n1;
+r = sqrt(x.^2 + y.^2);
+n = @(x,y) k.*r + n1;
+dndr = k;
+gv = -[x,y];
+theta = acos((gv(1)*v0(1) + gv(2)*v0(2))./(norm(gv)*norm(v0)));
+psi = ds*sin(theta)*dndr/n(r);
+psi = abs(psi);
+end
+% close all
+% figure(1)
+% axis equal;
+% % quiver(X,Y,Dx,Dy)
+% imagesc(absD)
+% title('abs(n*grad(n)) RK')
 % 
-% % close all
-% % 
-% % figure(1)
-% % hold on; grid on
-% % plot(x,tline2+0.001,'r')
-% % plot(xline,tline1,'b')
-% % 
-% % nline = grin.P(1000,1000:end);
-% % figure(2)
-% % hold on; grid on
-% % plot(x,nGradient(x)+0.001,'r')
-% % plot(xline,nline,'b')
+% figure(2)
+% axis equal;
+% imagesc(absDr)
+% title('abs(grad(n)) RK') 
 % 
-% n0 = 1.3;
-% n1 = 1.45;
+% figure(3)
+% axis equal;
+% quiver(X,Y,dndx,dndy)
+% title('grad(n) RK')
+% 
+% V = [0 -1];
+% D = @(x,y) (k./sqrt(x.^2 + y.^2)).*(k.*sqrt(x.^2 + y.^2) + n1);
+% A1x = ds.*D(X,Y).*X;
+% A1y = ds.*D(X,Y).*Y;
+% 
+% X2 = X + ds/2.*V(1) + ds/8.*A1x;
+% Y2 = Y + ds/2.*V(2) + ds/8.*A1y;
+% A2x = ds.*D(X2,Y2).*X2;
+% A2y = ds.*D(X2,Y2).*Y2;
+% 
+% X3 = X + ds.*V(1) + ds/2.*A2x;
+% Y3 = Y + ds.*V(2) + ds/2.*A2y;
+% A3x = ds.*D(X3,Y3).*X3;
+% A3y = ds.*D(X3,Y3).*Y3;
+% 
+% Vkx = V(1) + 1/6.*(A1x + 4.*A2x + A3x);
+% Vky = V(2) + 1/6.*(A1y + 4.*A2y + A3y);
+% absV = sqrt(Vkx.^2 + Vky.^2);
+% psi = acos((Vkx.*V(1) + Vky.*V(2))./absV);
+% 
+% figure(4)
+% axis equal;
+% % quiver(X,Y,Vkx,Vky)
+% imagesc(psi)
+% title('deflection RK')
+% 
+% 
+% ds=0.1;
+% [X, Y] = meshgrid(-1:ds:1,-1:ds:1);
+% r = sqrt(X.^2 + Y.^2);
+% n = k.*sqrt(X.^2 + Y.^2) + n1;
+% 
+% dndr = X./X.*k;
+% dndr(isnan(dndr)) = k; 
+% Rx = -X;
+% Ry = -Y;
+% theta = acos((Rx.*V(1) + Ry.*V(2))./r);
+% psi2 = ds.*sin(theta).*dndr./n;
+% 
+% figure(5)
+% axis equal;
+% % quiver(X,Y,Vkx,Vky)
+% imagesc(psi2)
+% title('deflection Meggit')
+% 
+% 
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% 
+% n0 = 1;
+% n1 = 1.5;
 % k = n0-n1;
-% r = 1;
-% ds = 10^-7;
-% nFunc = @(x) k.*x.^2 + n1;
-% p0 = [0.7 4];
-% v0 = [0 -1];
-% r0 = norm(p0);
-% [p0,~,~] = circleIntersect(r,p0,v0);
-% p0 = p0 + [0 -0];
-% r0 = norm(p0);
+% % n = @(x,y) k.*sqrt(x.^2 + y.^2) + n1;
+% % dndr = @(x,y) k./sqrt(x.^2 + y.^2).*[x y];
+% % dif = dndr(x',y');
+% % sqrt(dif(2,1)^2 + dif(2,2)^2)
+% % dif = dif.*n(x',y');
 % 
-% tic
-% dr = getLocalRadiusKnownGradient(p0,v0,r0,n0,n1);
-% [p1,v1] = curvePath(p0,v0,dr,ds);
-% toc
-% tic
-% [p2,v2] = rungekuttaTrace(p0',v0',ds,n0,n1);
-% toc
-% tic
-% [p3,v3] = snellRefract(p0,v0,n0,n1,ds);
-% toc
 % 
-% dang = @(u,v) acos(u(1)*v(1) + u(2)*v(2)/(sqrt(u(1)^2 + u(2)^2)*sqrt(v(1)^2 + v(2)^2)));
 % 
-% ang1 = dang(v0,v1);
-% ang2 = dang(v0,v2);
-% ang3 = dang(v0,v3);
-% difAng = ((ang1-ang2)/ang1).*100;
+% %linear  n(r)= k*r + n1
 % 
-% function r = getLocalRadiusKnownGradient(p,v,r0,n0,n1)
-% sN = -p';
-% sN = sN./sqrt(sN(1)^2 + sN(2)^2);
-% v = v./norm(v);
-% k = n0-n1;
-% nFunc = @(r) k*r^2 + n1;
-% n = nFunc(r0);
-% theta = acos(sN(1)*v(1) + sN(2)*v(2));
-% dn = -2*k*r0;
-% r = (n) / (sin(theta)*dn);
-% end
+% ds=0.1;
+% [X, Y] = meshgrid(-1:ds:1,-1:ds:1);
+% r = sqrt(X.^2 + Y.^2);
+% n = k.*sqrt(X.^2 + Y.^2) + n1;
+% dndr = k./sqrt(X.^2 + Y.^2);
+% dndy = dndr.*Y;
+% dndx = dndr.*X;
+% absDr = sqrt(dndx.^2 + dndy.^2); absDr(isnan(absDr)) = max(max(absDr)); 
+% D = k.*(k + n1./sqrt(X.^2 + Y.^2));
+% Dy = D.*Y;
+% Dx = D.*X;
+% absD = sqrt(Dx.^2 + Dy.^2); absD(isnan(absD)) = max(max(absD)); 
 % 
-% function [p1,v1] = rungekuttaTrace(p0,v0,ds,n0,n1)
-% v0 = v0./norm(v0);
-% k = n0-n1;
-% n = @(r) k*(r(1)^2 + r(2)^2) + n1;
-% dnds = @(r) 2*k*[p0(1);p0(2)];
-% D2 = @(r) n(r).*dnds(r);
-% D = @(r) 2*k.*[k.*(r(1)^3 + r(1)*r(2)^2) + n1*r(1);
-%                k.*(r(2)^3 + r(2)*r(1)^2) + n1*r(2)];
+% close all
+% figure(1)
+% axis equal;
+% % quiver(X,Y,Dx,Dy)
+% imagesc(absD)
+% title('abs(n*grad(n)) RK')
 % 
-% A = ds.*D2(p0);
-% B = ds.*D2(p0 + ds/2.*v0 + ds/8.*A);
-% C = ds.*D2(p0 + ds.*v0 + ds/2.*B);            
-% % A = ds.*D(p0);
-% % B = ds.*D(p0 + ds/2.*v0 + ds/8.*A);
-% % C = ds.*D(p0 + ds.*v0 + ds/2.*B);
-% p1 = p0 + ds.*(v0 + 1/6.*(A + 2.*B));
-% v1 = v0 + 1/6.*(A + 4.*B + C);
-% end
+% figure(2)
+% axis equal;
+% imagesc(absDr)
+% title('abs(grad(n)) RK') 
 % 
-% function [p1,v1] = snellRefract(p0,v0,n0,n1,ds)
-% N = p0;
-% k = n0-n1;
-% r0 = norm(p0);
-% nFunc = @(r) k*r.^2 + n1;
-% na = nFunc(r0 - ds/2*r0);
-% nb = nFunc(r0 + ds/2*r0);
-% % n = nFunc(r0);
-% % na = n - ds*n;
-% % nb = n + ds*n;
-% [v1, ~] = Snell(v0, N, nb, na);
-% v1 = v1./norm(v1);
-% p1 = p0 + ds.*v1;
-% end
+% figure(3)
+% axis equal;
+% quiver(X,Y,dndx,dndy)
+% title('grad(n) RK')
 % 
+% V = [0 -1];
+% D = @(x,y) (k./sqrt(x.^2 + y.^2)).*(k.*sqrt(x.^2 + y.^2) + n1);
+% A1x = ds.*D(X,Y).*X;
+% A1y = ds.*D(X,Y).*Y;
+% 
+% X2 = X + ds/2.*V(1) + ds/8.*A1x;
+% Y2 = Y + ds/2.*V(2) + ds/8.*A1y;
+% A2x = ds.*D(X2,Y2).*X2;
+% A2y = ds.*D(X2,Y2).*Y2;
+% 
+% X3 = X + ds.*V(1) + ds/2.*A2x;
+% Y3 = Y + ds.*V(2) + ds/2.*A2y;
+% A3x = ds.*D(X3,Y3).*X3;
+% A3y = ds.*D(X3,Y3).*Y3;
+% 
+% Vkx = V(1) + 1/6.*(A1x + 4.*A2x + A3x);
+% Vky = V(2) + 1/6.*(A1y + 4.*A2y + A3y);
+% absV = sqrt(Vkx.^2 + Vky.^2);
+% psi = acos((Vkx.*V(1) + Vky.*V(2))./absV);
+% 
+% figure(4)
+% axis equal;
+% % quiver(X,Y,Vkx,Vky)
+% imagesc(psi)
+% title('deflection RK')
+% 
+% 
+% ds=0.1;
+% [X, Y] = meshgrid(-1:ds:1,-1:ds:1);
+% r = sqrt(X.^2 + Y.^2);
+% n = k.*sqrt(X.^2 + Y.^2) + n1;
+% 
+% dndr = X./X.*k;
+% dndr(isnan(dndr)) = k; 
+% Rx = -X;
+% Ry = -Y;
+% theta = acos((Rx.*V(1) + Ry.*V(2))./r);
+% psi2 = ds.*sin(theta).*dndr./n;
+% 
+% figure(5)
+% axis equal;
+% % quiver(X,Y,Vkx,Vky)
+% imagesc(psi2)
+% title('deflection Meggit')
 % 
 % 
 % 
