@@ -7,39 +7,44 @@ close all
 % Source parameters
 v = [0;-1];
 p = [0;1.2];
-nRays = 10;
+nRays = 1000;
 width = 2.2;
 n0 = 1.3;
-n1 = 1.4;
+n1 = 1.45;
 r = 1;
-% nProfile = 'parabolic';
-nProfile = 'luneburg';
+nProfile = 'parabolic';
+
 % Initiate source
 s = source2d(p', v', nRays, width, n0, 'half');
-s2 = source2d(p', v', nRays, width, n0, 'half');
+% s2 =source2d(p', v', nRays, width, n0, 'half');
 % Initiate ray trace
+
 ds = 10^3;
 tic
-runge_kutta_trace_known_gradient(s,ds,nProfile,n0,n1,r)
+ray_trace(s,ds,n0,n1,r,nProfile,'meggit')
 toc
-meggitMeyer_rayTrace_known_gradient(s2,r,ds,[n0 n1])
+% tic
+% ray_trace(s2,ds,n0,n1,r,nProfile,'rk')
+% toc
 
 % Plot result
-figure(1)
-hold on; axis equal; grid on
-title('Runge-Kutta ray-trace')
-plotCircle(1,2*pi,1)
-plotLine([-1.2 0],[1.2 0],'k',1)
-plotLine([0 -1.2],[0 1.2],'k',1)
-s.plotTrace(1,'r')
-s2.plotTrace(1,'b')
+% figure(1)
+% hold on; axis equal; grid on
+% title('Runge-Kutta ray-trace')
+% plotCircle(1,2*pi,1)
+% plotLine([-1.2 0],[1.2 0],'k',1)
+% plotLine([0 -1.2],[0 1.2],'k',1)
+% s.plotTrace(1,'r')
+% s2.plotTrace(1,'b')
 
+% s.getEndVals_single(9,'print');
+% s2.getEndVals_single(9,'print');
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                       Calculating phaseShift
 %
 % Simulated parameters of object
-lambda = 550*12^-9;
+lambda = 550*10^-9;
 r = lambda*6*2;
 xRange = [0,1];
 
@@ -76,11 +81,11 @@ plot(peakPos,peaksDiff,'*')
 % Create a new source with the peak positions and trace. This is to be used
 % as a comarison to the aproximation trace.
 
-testS = source2d_variable_spacing([peakPos(2:end),ones(peaksN-1,1)*1.2*r],[0,-1],n0);
+sContr = source2d_variable_spacing([peakPos(2:end),ones(peaksN-1,1)*1.2*r],[0,-1],n0);
 
-steps = 10^3;
-runge_kutta_trace_known_gradient(testS,steps,'parabolic',n0,n1,r);
-testS.getBacktrace(0);
+ds = 10^3;
+ray_trace(sContr,ds,n0,n1,r,nProfile,'meggit')
+sContr.getBacktrace(0);
 % Plot result
 figure(4)
 hold on; axis equal; grid on
@@ -88,8 +93,8 @@ title('Runge-Kutta ray-trace')
 plotCircle(r,2*pi,4)
 plotLine([-1.2*r 0],[1.2*r 0],'k',4)
 plotLine([0 -1.2*r],[0 1.2*r],'k',4)
-testS.plotTrace(4,'r')
-testS.plotBacktrack(4)
+sContr.plotTrace(4,'r')
+sContr.plotBacktrack(4)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

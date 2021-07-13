@@ -15,6 +15,9 @@ classdef source2d_variable_spacing < handle
         backTrace = [];
         phasePath = {};
         minR = [];
+        diviation = {};
+        stepError = {};
+        nPath = {};
     end
     methods
         function this = source2d_variable_spacing(startP,startV,refractiveIndex)
@@ -31,6 +34,9 @@ classdef source2d_variable_spacing < handle
             this.phase = zeros(this.nRays,1);
             this.totalPath = zeros(this.nRays,1);
             this.backTrace = zeros(this.nRays,2);
+            this.diviation = cell(this.nRays,1);
+            this.stepError = cell(this.nRays,1);
+            this.nPath = cell(this.nRays,1);
         end
         
         function plotP(this,figureNr)
@@ -41,16 +47,6 @@ classdef source2d_variable_spacing < handle
             ylabel('Y - axis')
             plot(this.P(:,1),this.P(:,2),'.')
             quiver(this.P(:,1),this.P(:,2),this.V(:,1),this.V(:,2),'color','b')
-            grid on
-        end
-        function plotRay(this,rayNr,scaleRay,figureNr)
-            figure(figureNr)
-            hold on
-            axis equal
-            xlabel('X - axis')
-            ylabel('Y - axis')
-            plot(this.P(rayNr,1),this.P(rayNr,2),'.')
-            quiver(this.P(rayNr,1),this.P(rayNr,2),this.V(rayNr,1),this.V(rayNr,2),scaleRay,'color','b')
             grid on
         end
         
@@ -114,6 +110,25 @@ classdef source2d_variable_spacing < handle
 %                 t = (stopLine - this.P(rayInd,2))/this.V(rayInd,2);
 %                 px = this.P(rayInd,1) + t*this.V(rayInd,1);
                 plot([this.P(rayInd,1);this.backTrace(rayInd,1)],[this.P(rayInd,2);this.backTrace(rayInd,2)],'--b')
+            end
+        end
+        function plotRay(this,rayInd,color,figureNr)
+            figure(figureNr)
+            plot(this.PT{rayInd}(:,1),this.PT{rayInd}(:,2),color)
+        end
+        function px = plotRay_back(this,rayInd,backLine,color,figureNr)
+            figure(figureNr)
+            t = (backLine - this.P(rayInd,2))/this.V(rayInd,2);
+            px = this.P(rayInd,1) + t*this.V(rayInd,1);
+            plot([this.P(rayInd,1); px], [this.P(rayInd,2); backLine],color);
+        end
+        function [phase,totalPath,v,p] = getEndVals_single(this,rayInd,printval,scale)
+            phase = this.phase(rayInd);
+            totalPath = this.totalPath(rayInd);
+            v = this.V(rayInd,:);
+            p = this.P(rayInd,:);
+            if isequal(printval,'print')
+                fprintf('V = [%.6f, %.6f], P = [%.6f, %.6f], Total phase = %.4f, Total path = %.4f \n',v(1),v(2),p(1),p(2),phase/scale,totalPath/scale)
             end
         end
     end

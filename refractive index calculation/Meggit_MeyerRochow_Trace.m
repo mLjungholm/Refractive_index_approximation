@@ -1,4 +1,4 @@
-% Ray tracing based on algorithm by Nilsson, D-E et.al (1983), 
+ Ray tracing based on algorithm by Nilsson, D-E et.al (1983), 
 % using an approximation by Meggit & Meyer-Rochow (1975)
 % Written by 
 
