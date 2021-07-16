@@ -1,4 +1,4 @@
-function slice_trace_test(s,steps,R,n0,k,rayInd)
+function minR = slice_trace_test(s,steps,R,n0,k,rayInd)
 ds = R/steps;
 maxSteps = steps*2;
 rayPath = zeros(maxSteps,2).*nan;  % Create new path vector

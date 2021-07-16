@@ -129,7 +129,7 @@ classdef Source_2d < handle
                         if isempty(this.path{1})
                             quiver(this.P(id),this.P(id,2),this.V(id,1),this.V(id,2),color)
                         else
-                            plot(this.path{id}(:,1),this.path{id}(:,1),color)
+                            plot(this.path{id}(:,1),this.path{id}(:,2),color)
                         end                        
                     end
                 catch

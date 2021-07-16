@@ -47,39 +47,62 @@ sTrue.projectRays([0,0],[1,0],'back');
 ray_trace(sLinear,ds,n0,nFuncL(0),r,'linear','meggit')
 sLinear.projectRays([0,0],[1,0],'back');
 
-figure(2)
-hold on; axis equal; grid on
-title('Traced rays for the true,linear and aproximated gradient')
-plotCircle(r,2*pi,2)
-plotLine([-1.2*r 0],[1.2*r 0],'k')
-plotLine([0 -1.2*r],[0 1.2*r],'k')
-sTrue.plotRays('r')
-sTrue.plotProjection('--r');
-sLinear.plotRays('g')
-sLinear.plotProjection('--g');
+% figure(2)
+% hold on; axis equal; grid on
+% title('Traced rays for the true,linear and aproximated gradient')
+% plotCircle(r,2*pi,2)
+% plotLine([-1.2*r 0],[1.2*r 0],'k')
+% plotLine([0 -1.2*r],[0 1.2*r],'k')
+% sTrue.plotRays('r')
+% sTrue.plotProjection('--r');
+% sLinear.plotRays('g')
+% sLinear.plotProjection('--g');
 
 %%
 % Now tracing the testsource using the alogrithm in the aproximation script
 
 sSliceTest = Source_2d([peakPos(2),ones(1,1)*1.2*r],[0,-1]);
-slice_trace_test(sSliceTest,ds,r,n0,kL,1)
+rMin = slice_trace_test(sSliceTest,ds,r,n0,kL,1);
 sSliceTest.projectRays([0,0],[1,0],'back')
+ra = shellR(1);
+rb = shellR(2);
+na = ng(1);
+kL = (ng(1)-ng(2))/(ra-rb);
+nFuncL = @(x) kL.*(x.*r-ra) + na;
+sSliceTestApprox = Source_2d([peakPos(2),ones(1,1)*1.2*r],[0,-1]);
+rMinApprox = slice_trace_test(sSliceTestApprox,ds,r,n0,kL,1);
+sSliceTestApprox.projectRays([0,0],[1,0],'back')
 
-sSliceTest.plotRays('b')
-sSliceTest.plotProjection('--b');
+% sSliceTest.plotRays('b')
+% sSliceTest.plotProjection('--b');
 % legend('True','Approximation','True-Linear')
 
 fprintf('\n\n\nEnd values for the tested rays \n')
 scaleVal = 10^-7;
+fprintf('Parabolic \n')
 sTrue.getEndVals_single(1,'print',scaleVal);
+fprintf('Linear \n')
 sLinear.getEndVals_single(1,'print',scaleVal);
+fprintf('Linear trace \n')
 [phaseT,totalpathT,vT,pT] = sSliceTest.getEndVals_single(1,'print',scaleVal);
+fprintf('Approximation \n')
+testS.getEndVals_single(1,'print',scaleVal);
+fprintf('Slice Test Approximation \n')
+sSliceTestApprox.getEndVals_single(1,'print',scaleVal);
 
 fprintf('\nsTrue n avrg  ->     n = %.4f \n',sTrue.phase(1)/sTrue.totalPath(1) + n0);
 fprintf('sLinear n avrg ->    n = %.4f \n',sLinear.phase(1)/sLinear.totalPath(1) + n0);
 fprintf('sSliceTest n avrg -> n = %.4f \n',sSliceTest.phase(1)/sSliceTest.totalPath(1) + n0);
+fprintf('Approximation   ->   n = %.4f \n',ng(2));
+fprintf('sSliceTestApprox n avrg -> n = %.4f \n',sSliceTestApprox.phase(1)/sSliceTestApprox.totalPath(1) + n0);
+[phaseTot,~] = findTotPhase(sSliceTestApprox.P(1,:),sSliceTestApprox.V(1,:),peakPos,mPhaseShift);
+fprintf('next n is : %.4f \n',phaseTot/sSliceTestApprox.totalPath(1) + n0);
 fprintf('Max n-index for shell 1 is nMax = %.4f \n',nb);
 fprintf('Avr n-index for shell 1 is nAvr = %.4f \n',(na+nb)/2);
+fprintf('r1 for the linear test is : %.4f*10^-5\n',rMin*10^5);
+fprintf('r1 for the approximation test is : %.4f*10^-5 \n',shellR(2)*10^5);
+
+
 
 % Using the getLinearGradient function we would get a max n of
 ns = sSliceTest.phase(1)/sSliceTest.totalPath(1) + n0;
@@ -97,12 +120,12 @@ fprintf('\nMax n-index using getLinearGradient is nMax = %.4f \n\n',nmax);
 fprintf('The phase from the back projection would be: phase = %.4f \n',phaseTot/scaleVal)
 fprintf('Which would result in a n-Average of n = %.4f \n\n',phaseTot/totalpathT + n0);
 
-figure(3)
-grid on; hold on
-title('Phase shift profiles')
-plot(peakPos,mPhaseShift,'b')
-plot(truePhasePos,truePhaseShift,'r'),
-legend('True','Measured')
+% figure(3)
+% grid on; hold on
+% title('Phase shift profiles')
+% plot(peakPos,mPhaseShift,'b')
+% plot(truePhasePos,truePhaseShift,'r'),
+% legend('True','Measured')
 
 % Now try doing an itteration and check the values of both the traced phase
 % and the measured projected phase.
