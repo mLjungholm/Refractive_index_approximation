@@ -10,8 +10,16 @@ for i = 1:s.nRays
     phase = 0;
     totalPath = 0;
     
-    [p0,~,intersect] = circleIntersect(rs,s.P(i,:),s.V(i,:));
-    if ~intersect
+    [p0,p02,intersect] = circleIntersect(rs,s.P(i,:),s.V(i,:));
+    if ~intersect || isequal(p0, p02)
+        s.path{i} = [0 0];
+        s.diviation{i} = nan;
+        s.totalPath(i) = nan;
+        s.stepError{i} = nan;
+        %     s.nPath{i} = rn;
+        s.phase(i) = nan;
+%         s.P(i,:) = p1;
+%         s.V(i,:) = v1;
         continue
     end
     v0 = s.V(i,:);
@@ -87,11 +95,11 @@ for i = 1:s.nRays
                 step = step + 1;
             end
     end
-    s.PT{i} = rayPath;
+    s.path{i} = rayPath;
     s.diviation{i} = diviation;
     s.totalPath(i) = totalPath;
     s.stepError{i} = stepError;
-    s.nPath{i} = rn;
+%     s.nPath{i} = rn;
     s.phase(i) = phase;
     s.P(i,:) = p1;
     s.V(i,:) = v1;

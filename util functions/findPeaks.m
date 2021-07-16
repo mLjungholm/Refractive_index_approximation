@@ -79,5 +79,9 @@ while ~endoflist
 end
 peakVal = peakVal(~isnan(peakVal));
 peakPos = peakPos(~isnan(peakPos));
+if peakPos(end) == peakPos(end-1)
+    peakPos = peakPos(1:end-1);
+    peakVal = peakVal(1:end-1);
+end
 nrPeaks = length(peakVal);
 end

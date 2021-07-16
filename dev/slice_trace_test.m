@@ -1,10 +1,10 @@
-function slice_trace_test(s,steps,re,n0,k,rayInd)
-ds = re/steps;
+function slice_trace_test(s,steps,R,n0,k,rayInd)
+ds = R/steps;
 maxSteps = steps*2;
 rayPath = zeros(maxSteps,2).*nan;  % Create new path vector
 phasePath = 0;
 phaseSum = 0;
-[p0,~,~] = circleIntersect(re,s.P(rayInd,:),s.V(rayInd,:));
+[p0,~,~] = circleIntersect(R,s.P(rayInd,:),s.V(rayInd,:));
 rayPath(1,:) = p0;              % Set origin point
 v0 = s.V(rayInd,:);             % Current Vector
 rayStep = 2;                    % Current ray step
@@ -46,13 +46,13 @@ while ~exitVolume && rayStep < maxSteps
     if r1 < minR
         minR = r1;   % New min distance to center of colume
     end
-    if r1 > re
+    if r1 > R
         exitVolume = 1;
     end
 end
 s.P(rayInd,:) = p1;
 s.V(rayInd,:) = v1;
-s.PT{rayInd} = rayPath;
+s.path{rayInd} = rayPath;
 s.phase(rayInd) = phase;
 s.totalPath(rayInd) = totalPath;
 
@@ -61,7 +61,7 @@ s.totalPath(rayInd) = totalPath;
         gV = -p0./r0;
         gV = gV./norm(gV);
         theta = acos(dot(v0,gV)./norm(v0));
-        nr = k*(r0-re) + n0;
+        nr = k*(r0-R) + n0;
         %         nr = shellGradient(shellInd,1)*(r0-shellR(shellInd)) + shellGradient(shellInd,2);
         r = nr/(sin(theta) * -k);
         if abs(dot(gV,v0)) == 1 || isnan(theta)
@@ -70,18 +70,18 @@ s.totalPath(rayInd) = totalPath;
         else
             a = sign(det([v0' gV']));
             psi = ds * a / r;
-            R = @(psi) [cos(psi) -sin(psi);
+            Rot = @(psi) [cos(psi) -sin(psi);
                 sin(psi) cos(psi)];
-            v1 = R(psi)*v0';
+            v1 = Rot(psi)*v0';
             v1 = v1';
-            or = p0' + r.*R(a*pi/2)*v0';
-            p1 = R(psi)*(p0'-or) + or;
+            or = p0' + r.*Rot(a*pi/2)*v0';
+            p1 = Rot(psi)*(p0'-or) + or;
             p1 = p1';
         end
     end
 
     function phaseS = phaseShiftKnownGradient(r0,r1,~,dt)
-        nr = k*((r0+r1)/2-re) + n0;
+        nr = k*((r0+r1)/2-R) + n0;
         %         nr = shellGradient(shellInd,1)*((r0+r1)/2-shellR(shellInd)) + shellGradient(shellInd,2);
         phaseS = dt*(nr-n0);
     end
