@@ -207,9 +207,12 @@ setGradient(1);
                 fprintf('n-Contr = %.4f \n',nContr);
                 rN = relativeN(shellR(rayInd),minR,n(rayInd),n1,mPhasePos(rayInd+1));
                 fprintf('n-Test  = %.4f \n',rN);
-                
-                fprintf('n-avrg  = %.4f \n',);
+                nt = relativeN(shellR(rayInd),minR,n(rayInd),nt,mPhasePos(rayInd+1));
+                fprintf('n-avrg  = %.4f \n',nt);
                 fprintf('n-test/n-Contr = %.4f%% \n\n',(rN-nContr)/nContr*100)
+                
+                fprintf('R-min = %.4fum \n',minR*10^6)
+                fprintf('R-s   = %.4fum \n\n',mPhasePos(rayInd+1)*10^6)
                 
                 plot(rayPath(:,1),rayPath(:,2))
             end
