@@ -7,7 +7,7 @@ close all
 % Source parameters
 v = [0;-1];
 p = [0;1.2];
-nRays = 1000;
+nRays = 10000;
 width = 1.5;
 n0 = 1.3;
 n1 = 1.45;
@@ -19,7 +19,7 @@ s = Source_2d(p', v', nRays, width);
 % s2 =Source_2d(p', v', nRays, width);
 % Initiate ray trace
 
-ds = 10^3;
+ds = 10^4;
 tic
 ray_trace(s,ds,n0,n1,r,nProfile,'meggit')
 s.projectRays([0,0],[1,0],'back');
@@ -50,21 +50,22 @@ toc
 lambda = 550*10^-9;
 r = lambda*12*2;
 xRange = [0,1];
-[truePhaseShift, truePhasePos, relativePhasePos] = create_interference_pattern(s,lambda,r,1);
+[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,r,1);
 
 figure(2)
 hold on; grid on
-plot(truePhasePos,relativePhasePos)
+plot(truePhasePos,relativePhaseShift)
 
-[peakVal,peakPos,nPeaks] = findPeaks(truePhasePos,relativePhasePos,0.2);
-scatter(peakPos,peakVal,'bo')
+[peakVal,mPhasePos,nPeaks] = findPeaks(truePhasePos,relativePhaseShift,0.2);
+% peakPos(1) = r;
+scatter(mPhasePos,peakVal,'bo')
 
 mPhaseShift = get_phase_shift_from_peaks(peakVal,lambda);
 
 figure(3)
 hold on; grid on
 plot(truePhasePos,truePhaseShift,'b')
-plot(peakPos,mPhaseShift,'r')
+plot(mPhasePos,mPhaseShift,'r')
 
 
 %%
@@ -72,7 +73,7 @@ plot(peakPos,mPhaseShift,'r')
 % Create a new source with the peak positions and trace. This is to be used
 % as a comarison to the aproximation trace.
 
-sContr = Source_2d([peakPos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
+sContr = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
 
 ds = 10^3;
 ray_trace(sContr,ds,n0,n1,r,nProfile,'meggit')

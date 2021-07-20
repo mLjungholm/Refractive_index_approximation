@@ -3,18 +3,19 @@ classdef Source_2d < handle
     properties
         source_type = '2D Source';
         def = 'Undefined';
+        id = 'Undefined';
         % Souce variables:
         nRays = 0;  % Number of rays in source
         terminated = []; % Termination vector
         nStart = 1; % Refractive index of start medium
-
+        
         % Ray variables:
         P = [];             % Current point vector
         V = [];             % Current direction vector
         p0 = []; v0 = [];   % Start vector and coordinates for each ray
         path = {};          % Path vector
         totalPath = [];     % Total paht traveled
-        phase = [];         % Acumilated phase shift.        
+        phase = [];         % Acumilated phase shift.
         projection = [];    % Ray projection ontwo a line
         projection_base_v   % Base vector for the projections
         projection_center   % Centerpoint for the projection
@@ -26,9 +27,9 @@ classdef Source_2d < handle
     
     methods
         function this = Source_2d(startP,startV,varargin)
-            size_point_in = size(startP);    
+            size_point_in = size(startP);
             if ~isempty(varargin)
-%             if size_point_in(1) == 1 || size_point_in(2) == 1
+                %             if size_point_in(1) == 1 || size_point_in(2) == 1
                 try validateattributes(varargin{1},{'numeric'},{'scalar','real','integer'})
                 catch
                     fprintf('Error: Number of rays = varargin{1} needs to be a integer value \n')
@@ -41,7 +42,7 @@ classdef Source_2d < handle
                 end
                 this.def = 'Equal ray spacing';
                 this.nRays = varargin{1};
-%                 this.sWidth = varargin{2};
+                %                 this.sWidth = varargin{2};
                 this.terminated = zeros(this.nRays,1);
                 this.path = cell(this.nRays,1);
                 this.phase = zeros(this.nRays,1);
@@ -104,7 +105,8 @@ classdef Source_2d < handle
         function plotRays(this,color,varargin)
             if isempty(varargin)
                 if isempty(this.nRays)
-                    fprintf('Error: Rays are not defined \n')
+                    fprintf('Error in source.plotRays (%s)\n',this.id)
+                    fprintf('Rays are not defined \n\n')
                     return
                 end
                 hold on
@@ -116,12 +118,13 @@ classdef Source_2d < handle
                     end
                 end
             else
-                try 
+                try
                     validateattributes(varargin{1},{'numeric'},{'2d','real','integer'})
                     rayInds = varargin{1};
                     if isempty(this.nRays)
-                        fprintf('Error: Rays are not defined \n')
-                    return
+                        fprintf('Error in source.plotRays (%s)\n',this.id)
+                        fprintf('Rays are not defined \n\n')
+                        return
                     end
                     hold on
                     for rayInd = 1:length(rayInds)
@@ -130,10 +133,11 @@ classdef Source_2d < handle
                             quiver(this.P(id),this.P(id,2),this.V(id,1),this.V(id,2),color)
                         else
                             plot(this.path{id}(:,1),this.path{id}(:,2),color)
-                        end                        
+                        end
                     end
                 catch
-                    fprintf('Error: Input variable needs to be numerical indices of the rays or empty \n')
+                    fprintf('Error in source.plotRays (%s)\n',this.id)
+                    fprintf('Input variable needs to be numerical indices of the rays or empty \n\n')
                 end
             end
         end
@@ -158,17 +162,17 @@ classdef Source_2d < handle
                 is = A\x;
                 if isnan(is(1))
                     intersection(rayInd,:) = [nan nan];
-%                 elseif is(1) < 1
-%                     intersection(rayInd,:) = [nan nan];
-                else                    
+                    %                 elseif is(1) < 1
+                    %                     intersection(rayInd,:) = [nan nan];
+                else
                     pi = p' + is(2).*v';
-%                     px = p(1) + is(1).*v(1);
-%                     py = p(2) + is(2).*v(2);
-%                     pi = [px ,py];
+                    %                     px = p(1) + is(1).*v(1);
+                    %                     py = p(2) + is(2).*v(2);
+                    %                     pi = [px ,py];
                     vi = -c.*(pi' - this.P(rayInd,:));
                     vi = vi./norm(vi);
                     dir = dot(this.V(rayInd,:),vi);
-                    if dir < 0                        
+                    if dir < 0
                         intersection(rayInd,:) = [nan nan];
                     else
                         intersection(rayInd,:) = -pi';
@@ -181,11 +185,14 @@ classdef Source_2d < handle
         % Plot projected rays
         function plotProjection(this,color,varargin)
             if isempty(this.projection)
-                    fprintf('Error: No projection defined \n')
-                    return
+                fprintf('Error in source.plotProjection (%s)\n',this.id')
+                fprintf('No projection defined \n\n')
+                return
             elseif isempty(varargin)
                 if isempty(this.nRays)
-                    fprintf('Error: Rays are not defined \n')
+                    
+                    fprintf('Error in source.plotProjection (%s)\n',this.id')
+                    fprintf('Rays are not defined \n\n')
                     return
                 end
                 hold on
@@ -195,19 +202,23 @@ classdef Source_2d < handle
                     plot(px,py,color)
                 end
             else
-                try 
+                try
                     validateattributes(varargin{1},{'numeric'},{'2d','real','integer'})
                     rayInds = varargin{1};
                     if isempty(this.nRays)
-                        fprintf('Error: Rays are not defined \n')
-                    return
+                        
+                        fprintf('Error in source.plotProjection (%s)\n',this.id')
+                        fprintf('Rays are not defined \n\n')
+                        return
                     end
                     hold on
                     for id = 1:length(rayInds)
                         plotLine(this.P(rayInds(id),:),this.projection(rayInds(id),:),color)
                     end
                 catch
-                    fprintf('Error: Input variable needs to be numerical indices of the rays or empty /n')
+                    
+                    fprintf('Error in source.plotProjection (%s)\n',this.id')
+                    fprintf('Input variable needs to be numerical indices of the rays or empty \n\n')
                 end
             end
         end
@@ -222,4 +233,3 @@ classdef Source_2d < handle
         end
     end
 end
-    

@@ -8,93 +8,92 @@
 clc
 close all
 
-% Source for testing the Approximation
-sApproxTest = Source_2d([peakPos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
-% Approximating the refractive index
-steps = 10^3;
-n = homogenious_approximation(sApproxTest, mPhaseShift, peakPos,n0);
-figure(1)
-hold on; axis equal; grid on
-% The linear aproximation will print a ray each itteration
-[ng,shellGradient,shellR, itterations] = gradient_approximation(sApproxTest,peakPos,mPhaseShift,n,steps);
-% Plotting the control ray that was traced using the true n(x)
-sContr.plotRays('--r',1)
-
-
 % Getting the max n1 value if the gradient was linear within the range of
 % the first shell
-nFunc = @(x) k.*(x.*r).^2 + n1; %<- True n(r) (parabolic)
-na = nFunc(shellR(1)/r); %<- Shloud be na=n0 for fisrt shell
-nb = nFunc(shellR(2)/r); %<- max value in shell 1
-ra = shellR(1);  
-rb = shellR(2);
+k = (n0-n1)/r^2;
+nFunc = @(x) k.*x.^2 + n1; %<- True n(r) (parabolic)
+
+shellProfile = zeros(nPeaks - 1,3);
+na = nFunc(r); %<- Shloud be na=n0 for fisrt shell
+nb = nFunc(peakPos(1 + 1)); %<- max value in shell 1
+ra = r;  
+rb = peakPos(1 + 1);
 kL = (na-nb)/(ra-rb); % Linear gradient of n(r) in shell 1 (dif(n(x))
-nFuncL = @(x) kL.*(x.*r-ra) + na; % Linear function in shell 1
+nFuncL = @(x) kL.*(x-ra) + na; % Linear function in shell 1
 nb = nFuncL(0); % Max value for lens if all the volume should have the same linear gradient as shell 1
+shellProfile(1,:) = [na,nb,r];
+for shellInd = 2:nPeaks - 1
+na = nFunc(peakPos(shellInd)); %<- Shloud be na=n0 for fisrt shell
+nb = nFunc(peakPos(shellInd + 1)); %<- max value in shell 1
+ra = peakPos(shellInd);  
+rb = peakPos(shellInd + 1);
+kL = (na-nb)/(ra-rb); % Linear gradient of n(r) in shell 1 (dif(n(x))
+nFuncL = @(x) kL.*(x-ra) + na; % Linear function in shell 1
+nb = nFuncL(0); % Max value for lens if all the volume should have the same linear gradient as shell 1
+shellProfile(shellInd,:) = [na,nb,ra];
+end
 
-% Source for controling the trace using a linearisation fo the true value
-sLinearTest = Source_2d([peakPos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
+
+sLinearContr = Source_2d([peakPos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
+sLinearContr.id = 'sLinearContr';
+sApproxTest = Source_2d([peakPos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
+sApproxTest.id = 'sApproxTest';
+nh = homogenious_approximation(sApproxTest, mPhaseShift, peakPos,n0);
+steps = 10^4;
+
+% Ray 1
 % Trace the test ray using the linearization of n(x)-true in shell 1
-ray_trace(sLinearTest,steps,na,nb,r,'linear','meggit'); 
+ray_trace_single_ray(sLinearContr,steps,n0,n1,r,shellProfile,'meggitStepGradient',1); 
+% Approximating the refractive index
 
-% Plotting the ray that used a linearization of true n(x)
-sLinearTest.plotRays('--b',1)
-iterText = string(1:1:itterations(1));
-legendText = [iterText "Control" "Linear",];
-legend(legendText);
-% plotCircle(r,2*pi,1)
-% plotLine([-r 0].*1.2,[r 0]*1.2,'k')
-% plotLine([ 0 -r].*1.2,[0 r]*1.2,'k')
+% shellProfile = shellProfile(2,1);
 
-fprintf('\n\n n1 for the Linear case is n1 = %.4f \n',nFunc(shellR(2)))
-fprintf('(psi/d + n0)- linear is n1 = %.4f \n',sLinearTest.phase(1)/sLinearTest.totalPath(1) + n0)
-fprintf('(backT/d + n0)- linear is n-avr = %.4f \n',findTotPhase(sLinearTest.P(1,:),sLinearTest.V(1,:),peakPos,mPhaseShift)/sLinearTest.totalPath(1) + n0)
-fprintf('The measured phase for s-linear is T = %.4f \n',sLinearTest.phase(1)*10^7)
-fprintf('The backtraced phase for s-linear is T-back = %.4f \n',findTotPhase(sLinearTest.P(1,:),sLinearTest.V(1,:),peakPos,mPhaseShift)*10^7)
-
-% fprintf('\n\n n1 for the Linear case is n1 = %.4f \n',nFunc(shellR(2)))
-% fprintf('(psi/d + n0)- linear is n1 = %.4f \n',sLinearTest.phase(1)/sLinearTest.totalPath(1) + n0)
-% fprintf('(backT/d + n0)- linear is n-avr = %.4f \n',findTotPhase(sLinearTest.P(1,:),sLinearTest.V(1,:))/sLinearTest.totalPath(1) + n0)
-% fprintf('The measured phase for s-linear is T = %.4f',sLinearTest.phase(1))
-% fprintf('The backtraced phase for s-linear is T-back = %.4f',findTotPhase(sLinearTest.P(1,:),sLinearTest.V(1,:)))
+[n,~,shellR,~] = gradient_approximation(sApproxTest,r,peakPos,mPhaseShift,nh,steps,sLinearContr,shellProfile(2,1),1);
 
 
-% k = (n0-n1)/r^2;
-% shellInd = 1;
-% nApprox = @(x) shellGradient(shellInd,1).*(x.*r-shellR(shellInd)) + shellGradient(shellInd,2);
-% nFunc = @(x) k.*(x.*r).^2 + n1;
-% rx = linspace(shellR(shellInd+1),shellR(shellInd),100)./r;
-% na = nFunc(shellR(shellInd)/r);
-% nb = nFunc(shellR(shellInd+1)/r);
-% ra = shellR(shellInd);
-% rb = shellR(shellInd+1);
-% kL = (na-nb)/(ra-rb);
-% nFuncL = @(x) kL.*(x.*r-ra) + na;
-% 
-% 
+% % Ray 2
+% Trace the test ray using the linearization of n(x)-true in shell 1
+% ray_trace_single_ray(sLinearContr,steps,na,nb,r,shellProfile,'meggitStepGradient',2); 
+% % Approximating the refractive index
+% [n,~,shellR, ~] = gradient_approximation(sApproxTest,shellR,mPhaseShift,n,steps,sLinearContr,shellProfile(3,1),2);
+
+
+
+figure(1)
+hold on; axis equal; grid on
+for rayInd = 1:1
+sContr.plotRays('--r',rayInd)
+sApproxTest.plotRays('m',rayInd)
+sLinearContr.plotRays('--b',rayInd)
+plotCircle(shellR(rayInd+1),2*pi,1)
+end
+plotCircle(r,2*pi,1)
+plotLine([-r 0].*1.2,[r 0]*1.2,'k')
+plotLine([ 0 -r].*1.2,[0 r]*1.2,'k')
+% iterText = string(1:1:itterations(1));
+% legendText = [iterText "Control" "Linear",];
+% legend(legendText);
+
+
+
 % figure(2)
-% titleText = strcat('Gradients for shell :',num2str(shellInd));
-% title(titleText)
 % hold on; grid on
-% plot(rx,nFunc(rx),'b')
-% plot(rx,nApprox(rx),'r')
-% plot(rx,nFuncL(rx),'g')
-% legend('True','Approximation','True-Linear')
-% 
-% figure(3)
-% hold on; grid on
-% plot(peakPos,n,'*')
-% k = (n0-n1)/r^2;
-% nFunc = @(r) k.*r.^2 + n1;
-% plot(truePhasePos,nFunc(truePhasePos),'b')
-% scatter(shellR,ng,'ro')
-% legend('Homogenious approx','True gradient','Linear approx')
+% scatter(shellR,n,'bo')
+% plot(linspace(r,0,100),nFunc(linspace(r,0,100)),'k')
+% for i = 1:size(shellProfile,1)-1
+%     x = [shellProfile(i,3);shellProfile(i+1,3)];
+%     y = [shellProfile(i,1);shellProfile(i+1,1)];
+%     plot(x,y,'r');
+% end
+% x = [shellProfile(end,3);0];
+% y = [shellProfile(end,1);shellProfile(end,2)];
+% plot(x,y,'r');
 
 % Ray tracing based on algorithm by Nilsson, D-E et.al (1983),
 % using an approximation by Meggit & Meyer-Rochow (1975)
 % Written by Mikael Ljungholm (2021)
 
-function [n,shellGradient,shellR,itterations] = gradient_approximation(source,mPhasePos,mPhaseShift,n_homogenious,steps)
+function [n,shellGradient,shellR,itterations] = gradient_approximation(source,r_edge,mPhasePos,mPhaseShift,n_homogenious,steps,controlSource,nContr,rayInd)
 % n = zeros(source.nRays+1,1);
 % n(1) = n0;
 n = n_homogenious;
@@ -109,12 +108,12 @@ setGradient(1);
 % for rayInd = 1:s.nRays-1 % Exclude last ray that needs a special version
 % for rayInd = 1:s.nRays-1
 % for rayInd = 1:source.nRays
-for rayInd = 1:1
-   stopflag = loopRay(rayInd);
-   if stopflag
-       break
-   end
-end
+% for rayInd = 1:2
+   [~] = loopRay(rayInd);
+%    if stopflag
+%        break
+%    end
+% end
 
 
     function stopflag = loopRay(rayInd)
@@ -184,36 +183,60 @@ end
                 if r1 <= shellR(cShell+1) && cShell < nShells
                     cShell = cShell + 1;
                 elseif r1 > shellR(cShell)
+                    if cShell > 1
                     cShell = cShell - 1;
-                    if cShell < 1
+                    elseif r1 > r_edge
+%                     if cShell < 1
                         exitVolume = 1;
                     end
+                    
                 end
             end
             
             % Calculate phase shift, back project ray & compare phase shift
             % values
-            % [phaseTot,xip]
             phaseTot = findTotPhase(p0,v0,mPhasePos,mPhaseShift);
             n1  = n(1) + (phaseTot - phaseSum)/phasePath;
-%             n1 = getLinearGradient_CurvedTrace(shellR(rayInd),shellR(rayInd+1),n(rayInd),n1,(phaseTot - phaseSum),[shellPath(:,1) shellPath(:,2)]);
-            n2 = (n(1+rayInd) + n1)/2;
+%             nR = getLinearGradient_CurvedTrace(shellR(rayInd),minR,n(rayInd),n1,phaseTot,rayPath,ds);
+            nR = relativeN(shellR(rayInd),shellR(rayInd+1),n(rayInd),n1,minR);
+            n2 = (n(1+rayInd) + nR)/2;
+            if rayInd == 1
+
+            % Code for pringing values in each itteration
+            fprintf('\n\nItteration : %u \n',iter);
             
-            fprintf('Itteration : %u, n0 = %.4f, n1 = %.4f, n-avg = %.4f  diff = %.4f\n',iter,n(1+rayInd),n2,n1,abs(n(1+rayInd)-n2))
-            plot(rayPath(:,1),rayPath(:,2))
+%             fprintf('minR/shellR = %.4f%% \n',(minR-mPhasePos(rayInd+1))/mPhasePos(rayInd+1)*100)
             
+            fprintf('Back Traced Phase T-testS: %.4f \n',phaseTot*10^7);
+            T_contr = findTotPhase(controlSource.P(rayInd,:),controlSource.V(rayInd,:),mPhasePos,mPhaseShift);
+            fprintf('Back Traced Phase T-contr: %.4f \n',T_contr*10^7);
+            fprintf('Measured Contr Phase T-m:  %.4f \n\n',controlSource.phase(rayInd)*10^7);
             
+            fprintf('Test source path Length   d-testS: %.4f \n',totalPath*10^7);
+            fprintf('Contr source path Length  d-testS: %.4f \n\n',controlSource.totalPath(rayInd)*10^7);
+            
+            fprintf('n-True: %.4f \n',nContr);
+            rN = relativeN(shellR(rayInd),minR,n(rayInd),nR,mPhasePos(rayInd+1));
+            fprintf('n-TestM: %.4f \n',rN);
+            fprintf('n-TestM: %.4f for r = %.2fum\n',nR,minR*10^6);
+            na = T_contr/controlSource.totalPath(rayInd) + n(1);
+            [~,d_contr] = getClosestPoint(controlSource,rayInd,[0 0]);
+            rN = relativeN(shellR(rayInd),d_contr,n(rayInd),na,mPhasePos(rayInd+1));
+            fprintf('n-contr: %.4f for r = %.2fum -> n = %.4f \n',na,d_contr*10^6,rN);
+            fprintf('n-test/n-True= %.4f%% \n',(rN-nContr)/nContr*100) 
+            end
             
             n(1 + rayInd) = n2;
             accuarcy = abs(nRef - n(1+rayInd));
-            nRef = n(1+rayInd);
+            nRef = nR;
             shellR(1+rayInd) = minR;
             setGradient(rayInd);
             iter = iter + 1;
             if iter == maxIter
                 stopflag = 1;
-                fprintf('Error: Exceeding maximum itterations! \n Faulty ray ind = %u \n',rayInd)
-                return
+                fprintf('Error in gradient_approximation()\n')
+                fprintf('Exceeding maximum itterations! \n Faulty ray ind = %u \n\n',rayInd)
+                break
             end            
         end
         if n(1+rayInd) < 0
@@ -222,6 +245,11 @@ end
             stopflag = 1;
             return
         end
+%         shellR(1+rayInd) = minR;
+%         nR = relativeN(shellR(rayInd),mPhasePos(rayInd+1),n(rayInd),n(rayInd+1),minR);
+%         nR = relativeN(shellR(rayInd),minR,n(rayInd),n(rayInd+1),mPhasePos(rayInd+1));
+%         n(rayInd+1) = nR;
+%         setGradient(rayInd);
         itterations(rayInd) = iter-1;
         source.P(rayInd,:) = p1;
         source.V(rayInd,:) = v1;
@@ -304,7 +332,6 @@ end
 %             phaseTot = 0;
 %         end
 %     end
-
 end
 
     function phaseTot = findTotPhase(p0,v0,mPhasePos,mPhaseShift)
@@ -327,11 +354,29 @@ end
         end
     end
 
+    
+    function rN = relativeN(r0,r1,n0,n1,r)
+    kL = (n0-n1)/(r0-r1); % Linear gradient of n(r) in shell 1 (dif(n(x))
+    nFuncL = @(x) kL.*(x-r0) + n0; % Linear function in shell 1
+    rN = nFuncL(r);
+    end
 
 
-
-
-
+    function [closestPoint,d] = getClosestPoint(source,rayNr,point)
+    path = source.path{rayNr};
+    key = ~isnan(path(:,1));
+    path = path(key,:);
+    steps = size(path,1);
+    d = inf;
+    closestPoint = [nan nan];
+    for ind = 1:steps
+        testD = norm(path(ind,:)-point);
+        if testD < d
+            d = testD;
+            closestPoint = path(ind,:);
+        end
+    end
+    end
 
 
 
