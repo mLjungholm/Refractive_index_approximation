@@ -7,21 +7,21 @@ close all
 % Source parameters
 v = [0;-1];
 p = [0;1.2];
-nRays = 10000;
+nRays = 1000;
 width = 1.5;
 n0 = 1.3;
 n1 = 1.45;
 r = 1;
-nProfile = 'parabolic';
+nProfile = 'step';
 
 % Initiate source
 s = Source_2d(p', v', nRays, width);
 % s2 =Source_2d(p', v', nRays, width);
 % Initiate ray trace
 
-ds = 10^4;
+ds = 10^3;
 tic
-ray_trace(s,ds,n0,n1,r,nProfile,'meggit')
+ray_trace(s,ds,n0,n1,r,nProfile,'snell')
 s.projectRays([0,0],[1,0],'back');
 toc
 % tic
@@ -32,7 +32,7 @@ toc
 % figure(1)
 % hold on; axis equal; grid on
 % title('Runge-Kutta ray-trace')
-% plotCircle(1,2*pi,1)
+% plotCircle(1,2*pi)
 % plotLine([-1.2 0],[1.2 0],'k')
 % plotLine([0 -1.2],[0 1.2],'k')
 % s.plotRays('r')
@@ -48,9 +48,11 @@ toc
 %
 % Simulated parameters of object
 lambda = 550*10^-9;
-r = lambda*12*2;
+r = lambda*30*2;
+% r = 1;
+% lambda = r/60;
 xRange = [0,1];
-[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,r,1);
+[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,r,0);
 
 figure(2)
 hold on; grid on
@@ -76,20 +78,20 @@ plot(mPhasePos,mPhaseShift,'r')
 sContr = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
 
 ds = 10^3;
-ray_trace(sContr,ds,n0,n1,r,nProfile,'meggit')
+ray_trace(sContr,ds,n0,n1,r,nProfile,'snell')
 sContr.projectRays([0,0],[1,0],'back');
 
 % Plot result
 figure(4)
 hold on; axis equal; grid on
-plotCircle(r,2*pi,4)
+plotCircle(r,2*pi)
 plotLine([-1.2*r 0],[1.2*r 0],'k')
 plotLine([0 -1.2*r],[0 1.2*r],'k')
 sContr.plotRays('r')
 sContr.plotProjection('--b')
 
 
-
+clear ans ds nRays p peakVal relativePhaseShift v width xRange
 
 
 

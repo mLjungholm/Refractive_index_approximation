@@ -9,4 +9,8 @@ else
     disp('Error in getting the phase shift profile')
 end
 peaksDiff = [halfsteps';p];
+if peakVal(1) > 0.1
+    p0 = peakVal(1)*lambda/2;
+    peaksDiff(1) = p0;
+end
 end

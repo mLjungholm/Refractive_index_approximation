@@ -48,6 +48,13 @@ end
 % Sort positions and scale to radius.
 comp = [c_phase_shift, c_phase_pos];
 comp = sortrows(comp,2);
+
+if side == 1
+    k = (comp(1,1)-comp(2,1))/(comp(1,2)-comp(2,2));
+    pv = k*comp(1,2) + comp(1,1);
+    comp = [pv 0; comp];
+end
+
 comp = comp.*r;
 c_phase_shift = comp(:,1);
 c_phase_pos = comp(:,2);

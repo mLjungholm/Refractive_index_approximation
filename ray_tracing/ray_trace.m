@@ -78,22 +78,20 @@ for i = 1:s.nRays
                 step = step + 1;
             end
         case 'snell'
-            while ~exitflag && step < maxSteps
-                [p1,v1,alpha,dserr,np,d] = snellDiff_step(ds,p0,v0,n0,n1,rs,nProfile);
-                r1 = norm(p1);
-                if r1 > rs
-                    exitflag = 1;
-                end
-                rayPath(step+1,:) = p1;
-                phase = phase + norm(p1-p0)*(np-n0);
-                totalPath = totalPath + d;
-                diviation(step) = alpha;
-                stepError(step) = dserr;
-                rn(step) = np;
-                p0 = p1;
-                v0 = v1;
-                step = step + 1;
-            end
+                N = p0./norm(p0);
+                [v1, ~] = Snell(v0, N, n0, n1);
+                [~,p1,~] = circleIntersect(rs,p0,v1);
+                rayPath(1,:) = p0;                
+                rayPath(2,:) = p1;
+                N = p1./norm(p1);
+                [v1, ~] = Snell(v1, N, n1, n0);
+                totalPath = norm(p0-p1);
+                phase = totalPath*(n1-n0);
+                diviation(step) = 0;
+                stepError(step) = 0;
+%                 rn(step) = np;
+%                 p0 = p1;
+%                 v0 = v1;  
     end
     s.path{i} = rayPath;
     s.diviation{i} = diviation;
