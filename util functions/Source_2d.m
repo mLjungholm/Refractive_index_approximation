@@ -29,7 +29,7 @@ classdef Source_2d < handle
     
     methods
         function this = Source_2d(startP,startV,varargin)
-            size_point_in = size(startP);
+%             size_point_in = size(startP);
             if ~isempty(varargin)
                 %             if size_point_in(1) == 1 || size_point_in(2) == 1
                 try validateattributes(varargin{1},{'numeric'},{'scalar','real','integer'})
@@ -130,11 +130,11 @@ classdef Source_2d < handle
                     end
                     hold on
                     for rayInd = 1:length(rayInds)
-                        id = rayInds(rayInd);
+                        ids = rayInds(rayInd);
                         if isempty(this.path{1})
-                            quiver(this.P(id),this.P(id,2),this.V(id,1),this.V(id,2),color)
+                            quiver(this.P(ids),this.P(ids,2),this.V(ids,1),this.V(ids,2),color)
                         else
-                            plot(this.path{id}(:,1),this.path{id}(:,2),color)
+                            plot(this.path{ids}(:,1),this.path{ids}(:,2),color)
                         end
                     end
                 catch
@@ -199,9 +199,11 @@ classdef Source_2d < handle
                 end
                 hold on
                 for rayNr = 1:this.nRays
-                    px = [this.P(rayNr,1);this.projection(rayNr,1)];
-                    py = [this.P(rayNr,2);this.projection(rayNr,2)];
-                    plot(px,py,color)
+                    if ~isnan(this.projection(rayNr,1))
+                        px = [this.P(rayNr,1);this.projection(rayNr,1)];
+                        py = [this.P(rayNr,2);this.projection(rayNr,2)];
+                        plot(px,py,color)
+                    end
                 end
             else
                 try
@@ -214,8 +216,8 @@ classdef Source_2d < handle
                         return
                     end
                     hold on
-                    for id = 1:length(rayInds)
-                        plotLine(this.P(rayInds(id),:),this.projection(rayInds(id),:),color)
+                    for ids = 1:length(rayInds)
+                        plotLine(this.P(rayInds(ids),:),this.projection(rayInds(ids),:),color)
                     end
                 catch
                     

@@ -5,14 +5,17 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                           Tracing the rays
 % Source parameters
+lambda = 550*10^-9;
+r = lambda*55*2;
 v = [0;-1];
 p = [0;1.2];
 nRays = 1000;
-width = 1.5;
+width = r;
 n0 = 1.3;
 n1 = 1.45;
-r = 1;
-nProfile = 'step';
+ra = r;
+rb = ra/4;
+nProfile = 'parabolic';
 
 % Initiate source
 s = Source_2d(p', v', nRays, width);
@@ -21,7 +24,7 @@ s = Source_2d(p', v', nRays, width);
 
 ds = 10^3;
 tic
-ray_trace(s,ds,n0,n1,r,nProfile,'snell')
+ray_trace_elliptical(s,ds,n0,n1,ra,rb,nProfile,'meggit')
 s.projectRays([0,0],[1,0],'back');
 toc
 % tic
@@ -31,13 +34,13 @@ toc
 % Plot result
 % figure(1)
 % hold on; axis equal; grid on
-% title('Runge-Kutta ray-trace')
-% plotCircle(1,2*pi)
-% plotLine([-1.2 0],[1.2 0],'k')
-% plotLine([0 -1.2],[0 1.2],'k')
+% % title('Runge-Kutta ray-trace')
+% plotEllipse(ra,rb,2*pi)
+% plotLine([-1.2*ra 0],[1.2*ra 0],'k')
+% plotLine([0 -1.2*rb],[0 1.2*rb],'k')
 % s.plotRays('r')
 % s.plotProjection('--b')
-% s2.plotRays('b')
+
 
 % s.getEndVals_single(9,'print');
 % s2.getEndVals_single(9,'print');
@@ -47,12 +50,11 @@ toc
 %                       Calculating phaseShift
 %
 % Simulated parameters of object
-lambda = 550*10^-9;
-r = lambda*30*2;
+
 % r = 1;
 % lambda = r/60;
 xRange = [0,1];
-[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,r,0);
+[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,nan,0);
 
 figure(2)
 hold on; grid on
@@ -78,13 +80,13 @@ plot(mPhasePos,mPhaseShift,'r')
 sContr = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
 
 ds = 10^3;
-ray_trace(sContr,ds,n0,n1,r,nProfile,'snell')
+ray_trace_elliptical(sContr,ds,n0,n1,ra,rb,nProfile,'meggit')
 sContr.projectRays([0,0],[1,0],'back');
 
 % Plot result
 figure(4)
 hold on; axis equal; grid on
-plotCircle(r,2*pi)
+plotEllipse(ra,rb,2*pi)
 plotLine([-1.2*r 0],[1.2*r 0],'k')
 plotLine([0 -1.2*r],[0 1.2*r],'k')
 sContr.plotRays('r')

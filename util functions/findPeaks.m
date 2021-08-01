@@ -83,6 +83,12 @@ if peakPos(end) == peakPos(end-1)
     peakPos = peakPos(1:end-1);
     peakVal = peakVal(1:end-1);
 end
-
+if peakVal(1) < peakVal(2) && peakVal(2) < 0.5
+    peakVal = [peakVal(1); peakVal(3:end)];
+    peakPos = [peakPos(1); peakPos(3:end)];
+end
 nrPeaks = length(peakVal);
 end
+
+
+

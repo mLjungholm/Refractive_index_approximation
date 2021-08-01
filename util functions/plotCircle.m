@@ -8,6 +8,6 @@ y = r.*sin(linspace(-rads/2,rads/2,1000));
 if isempty(varargin)
     plot(x,y,'linewidth',0.5,'Color',[0.6 0.6 0.6])
 else
-    plot(x,y,'linewidth',0.5,'Color',varargin{1})
+    plot(x,y,'linewidth',0.5,'Color',varargin{:})
 end
 end

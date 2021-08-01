@@ -54,8 +54,10 @@ if side == 1
     pv = k*comp(1,2) + comp(1,1);
     comp = [pv 0; comp];
 end
+if ~isnan(r)
+    comp = comp.*r;
+end
 
-comp = comp.*r;
 c_phase_shift = comp(:,1);
 c_phase_pos = comp(:,2);
 
