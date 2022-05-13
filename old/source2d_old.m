@@ -17,6 +17,7 @@ classdef source2d_old < handle
         diviation = {};
         stepError = {};
     end
+    
     methods
         function this = source2d_old(startP,startV, nRays, sWidth,refractiveIndex,halfside)
             this.nRays = nRays;

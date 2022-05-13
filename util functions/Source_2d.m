@@ -112,13 +112,17 @@ classdef Source_2d < handle
                     return
                 end
                 hold on
-                if  any(cellfun(@isempty,this.path))
-                    quiver(this.P(:,1),this.P(:,2),this.V(:,1),this.V(:,2),color)
-                else
+%                 if  any(cellfun(@isempty,this.path))
+%                     quiver(this.P(:,1),this.P(:,2),this.V(:,1),this.V(:,2),color)
+%                 else
                     for rayNr = 1:this.nRays
-                        plot(this.path{rayNr}(:,1),this.path{rayNr}(:,2),color)
+                        if isempty(this.path{rayNr})
+%                             quiver(this.P(rayNr,1),this.P(rayNr,2),this.V(rayNr,1),this.V(rayNr,2),color)
+                        else
+                            plot(this.path{rayNr}(:,1),this.path{rayNr}(:,2),color)
+                        end
                     end
-                end
+%                 end
             else
                 try
                     validateattributes(varargin{1},{'numeric'},{'2d','real','integer'})

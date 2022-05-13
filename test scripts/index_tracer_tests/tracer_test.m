@@ -17,11 +17,11 @@ width = rs;
 % half = 'half';
 half = 0;
 
-% g = GRIN2d(rs/10^3,nProfile,'matrix',n0,[n0 n1]);
+g = GRIN2d(rs/10^3,nProfile,'matrix',n0,[n0 n1]);
 
-s_megg = source2d(p0,v0, nRays, width,n0,half);
+s_megg = Source_2d(p0,v0, nRays, width,n0,half);
 % s_megg_diff = source2d(p0,v0, nRays, width,n0,half);
-s_rk = source2d(p0,v0, nRays, width,n0,half);
+s_rk = Source_2d(p0,v0, nRays, width,n0,half);
 % s_grin = source2d(p0,v0, nRays, width,n0,half);
 
 

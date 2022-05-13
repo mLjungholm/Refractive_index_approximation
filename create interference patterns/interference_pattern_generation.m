@@ -19,7 +19,7 @@ nProfile = 'parabolic';
 
 % Initiate source
 s = Source_2d(p', v', nRays, width);
-% s2 =Source_2d(p', v', nRays, width);
+s2 =Source_2d(p', v', nRays, width);
 % Initiate ray trace
 
 ds = 10^3;
