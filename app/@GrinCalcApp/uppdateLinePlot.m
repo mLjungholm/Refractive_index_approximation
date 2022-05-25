@@ -1,6 +1,8 @@
 function uppdateLinePlot(app)
+
 app.UIAxesLine.NextPlot = 'replaceChildren';
 plot(app.UIAxesLine,0,0)
+app.UIAxesLine.NextPlot = 'add';
 
 if isempty(app.lens.mLines)
     return
@@ -10,16 +12,17 @@ if app.RawButton.Value
     interpolation = 'raw';
 elseif app.GaussianButton.Value
     interpolation = 'gauss';
-else
+elseif app.SavGoButton.Value
     interpolation = 'sgolay';
+else
+    interpolation = 'all';
 end
 
 if app.ShowalllayersCheckBox.Value
     layerIndex = 'all';
-    app.UIAxesLine.NextPlot = 'add';
+    
 else
     layerIndex = app.LayerSpinnerLine.Value;
-    app.UIAxesLine.NextPlot = 'replaceChildren';
 end
 
 currentLineId = app.SamplingLineSpinner.Value;
@@ -27,6 +30,8 @@ app.lens.mLines{currentLineId}.AppPlotData(app.UIAxesLine,interpolation,layerInd
 app.UIAxesLine.XMinorGrid = 'on';
 app.UIAxesLine.YMinorGrid = 'on';
 
-
+if app.ShowPeaks.Value
+    app.lens.mLines{currentLineId}.AppPlotPeaks(app.UIAxesLine,interpolation,layerIndex)
+end
 
 end

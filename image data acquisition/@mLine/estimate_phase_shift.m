@@ -16,11 +16,11 @@ if this.leftPhaseMax < this.leftPhaseMin
     startPhase = flip(startPhase);
 end
 
-figure(1)
-hold on
-grid minor
-plot([0;0],[0;0.5],'k')
-plot([0;0],[0;0],'k.')
+% figure(1)
+% hold on
+% grid minor
+% plot([0;0],[0;0.5],'k')
+% plot([0;0],[0;0],'k.')
 % Loop through all layers in the span
 for spanInd = 1:spanNums
     points_in_layer = this.L{span(spanInd)};
@@ -41,14 +41,14 @@ for spanInd = 1:spanNums
     for pInd = 2:pNums
         cdelta = abs(this.PD(points_in_layer(pInd))-this.centerLine + this.leftEdge);
         if cdelta < this.centerZone
-%             endVal = this.centerVal(spanInd);
-%             peVal = this.PV(points_in_layer(end));
-%             if peVal > 0.5
-%                 phaseTemp = (pInd-2)/2 + startShift + (1-endVal)/2;
-%             else
-%                 phaseTemp = (pInd-2)/2 + startShift + endVal/2;
-%             end
-%             this.PP(points_in_layer(pInd)) = phaseTemp;
+            endVal = this.centerVal(spanInd);
+            peVal = this.PV(points_in_layer(end));
+            if peVal > 0.5
+                phaseTemp = (pInd-2)/2 + startShift + (1-endVal)/2;
+            else
+                phaseTemp = (pInd-2)/2 + startShift + endVal/2;
+            end
+            this.PP(points_in_layer(pInd)) = phaseTemp;
 %             txt = num2str(span(spanInd));
 %             d = this.PD(points_in_layer(end));
 %             text(d,phaseTemp,txt)

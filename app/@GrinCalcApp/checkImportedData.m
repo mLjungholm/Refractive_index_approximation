@@ -23,6 +23,7 @@ if ~isempty(app.lens.mLines)
     app.DeleteLineButton.Enable = true;
     app.currentLineId = find(~cellfun(@isempty,app.lens.mLines),1);
     app.SamplingLineSpinner.Value = app.currentLineId;
+    app.uppdateLineData()
     if length(app.lens.mLines) > 1
         app.SamplingLineSpinner.Limits = [1,length(app.lens.mLines)];
         app.SamplingLineSpinner.Enable = true;
@@ -55,10 +56,10 @@ if ~isempty(app.lens.calibIm)
     imshow(app.lens.calibIm,'Parent',app.UIAxesCalibration)
 end
 if ~isnan(app.lens.lambda)
-    app.Wavelength.Value = app.lens.lambda;
+    app.Wavelenght.Value = app.lens.lambda;
 end
-if ~isnan(app.lens.lambda)
-    app.n0.Value = app.lens.lambda;
+if ~isnan(app.lens.n0)
+    app.n0.Value = app.lens.n0;
 end
 if ~isnan(app.lens.calibKnownDistance)
     app.CalibDist.Value = app.lens.calibKnownDistance/10^-6;
@@ -71,6 +72,9 @@ end
 if ~isnan(app.lens.pixelSize)
     app.PixelSize.Value = app.lens.pixelSize;
 end
+
+
+
 
 end
 

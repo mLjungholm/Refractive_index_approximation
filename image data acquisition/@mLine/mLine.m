@@ -100,6 +100,10 @@ classdef mLine < handle
         find_minmax_slice(this)
 
         AppPlotData(this,imhandle,interpolation,layerIndex)
+        AppPlotPeaks(this,imhandle,interpolation,layerIndex)
+        AppFlipData(this)
+        AppPlotPhase(this,imhandle)
+        AppEstimatePhaseShift(this)
         % Test functions
         function plotTracedPeaks(this)
             figure(1)

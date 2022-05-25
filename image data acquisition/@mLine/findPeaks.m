@@ -2,6 +2,9 @@
 function findPeaks(this)
 this.gaussPks = {};
 this.sgolayPks = {};
+if isnan(this.leftEdge)
+    this.leftEdge = 0;
+end
 for layerInd = 1:this.imNums
     % Find the peaks and valeys of the gaussian smoothed curve
     [pksH,locsH] = findpeaks(this.gaussPoints(:,layerInd),'MinPeakDistance',40);
