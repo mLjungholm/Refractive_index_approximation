@@ -31,10 +31,14 @@ classdef  Imstack < handle
         pixelSize = nan;    % Size of each pixel
         lambda = nan;       % wavelength of test source
         imPhaseShift = nan; % Phase shift between each image (fraction of 2pi phase shift)
-        phaseShiftMap = []; % Image containing all phase shift points and values
-        rIndexMap = [];     % Calculated refractive index map
+%         phaseShiftMap = []; % Image containing all phase shift points and values
+%         rIndexMap = [];     % Calculated refractive index map
         lastLineId = nan;
         n0 = nan;
+        n_overlay = [];     % Imstack overlay with interpolated n-values
+%         overlayPos = [];    % image position of the n-overlay
+        includeLine = [];   % boolean if the line should be included in calculations
+        simulatedLine = []; % boolean if the line has been simulated
     end
     
     methods
@@ -53,6 +57,8 @@ classdef  Imstack < handle
         ind = AppCreateSamplingLine(this,roi)
         ind = AppCreateSupportLine(this,imhandle)
         roiLine = AppCalibrateImage(this,imhandle)
+        AppInterpolateRefractiveIndex(this)
+        AppUppdateLineData(this,lineData)
 
         %% Import a stack of images
         function importStack(this)

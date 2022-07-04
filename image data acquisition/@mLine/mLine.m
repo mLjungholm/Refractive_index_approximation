@@ -22,20 +22,22 @@ classdef mLine < handle
         pixelSize = nan;    % True size of pixels
         lambda = nan;       % Wavelength
         n0 = nan;           % Initial refractive index.
-        refractiveGradient = nan; % Calculated refractive index gradient.
-        gradientD = nan;
+        refractiveGradient = []; % Calculated refractive index gradient.
+        gradientD = [];
         pointNums = nan;    % Number of sampling points
         imNums = nan;       % Number of images in the sampling stack
         testSlice = nan;
         
         gaussPks = [];          % peak coordinate for the gaussian
         gaussPoints = [];       % Gaussian point coordinates
-        sgolayPks = [];         % peak coordinates for the Savitzky-Golay
+        sgolayPks = [];         % peak coordinates for the Savitzky-Golay {pointInd,layer}
         sgolayPoints = [];      % Sgolay point coordinates
         pks = [];               % summarized peaks
         pksNums = nan;          % Number of summarized peaks
         phasePoints = [];
         phase_func = nan;
+        fittype = 'none';
+        phaseFitChangeFlag = false;
         
         centerLine = nan;       % Coordinate for the center of the lens
         centerLineIndex = nan;
@@ -46,10 +48,15 @@ classdef mLine < handle
         leftPhaseMax = nan;    % Index for the layer used as reference point for the phase shift
         leftPhaseMin = nan;
         
-        sgolayZone = nan;
+%         sgolayZone = 0;
+%         centerVal = [];
+        
         centerZone = nan;
-        centerVal = [];
-        % Variables from the trace peaks function
+        edgeZone = nan;
+        sgolayEdge = nan;
+%         sgolayCenter = nan;
+        
+        %         Variables from the trace peaks function
         PD = [] % Point distance
         PL = [] % Point Layer
         PS = [] % Point series
@@ -57,6 +64,11 @@ classdef mLine < handle
         PV = [] % peak value
         L = {} % Each cell in L(layer) = [points];
         S = {} % Series
+        Pinc = [] % Include point in calulations & plots
+        seriesNums = 0;
+        layerPhaseStep = nan;
+        edgeFit = nan;
+%         phaseTable = table()
         
         validS = [];
         validP = [];
@@ -70,6 +82,9 @@ classdef mLine < handle
         function this = mLine(coords, lineInd)
             this.lineCoord = coords;
             this.lineInd = lineInd;
+%             sz = [1 5];
+%             varTypes = {'uint8','uint8','uint8','double','logical'};
+%             this.phaseTable = table('Size',sz,'VariableTypes',varTypes);
         end
         
         % Function block
@@ -98,12 +113,18 @@ classdef mLine < handle
         calculate_refractive_index(this)
         grin = create_grin(this, stepNums)
         find_minmax_slice(this)
+        clearTracedPeaks(this)
+        xy = npoints2imcoords(this) % Converts the refractive vakues to the x,y coordinates from the sampling image
 
         AppPlotData(this,imhandle,interpolation,layerIndex)
         AppPlotPeaks(this,imhandle,interpolation,layerIndex)
         AppFlipData(this)
-        AppPlotPhase(this,imhandle)
+        AppPlotPhaseGradient(this, i)
         AppEstimatePhaseShift(this)
+        flag = AppTracePeaks(this,layer,span,threshold, min_nums_in_serie)
+        AppCalculateRefractiveIndex(this)
+        AppFitPhaseShiftProfile(this,fittype,lowRes)
+        AppPlotRefractiveGradient(imhandle)
         % Test functions
         function plotTracedPeaks(this)
             figure(1)

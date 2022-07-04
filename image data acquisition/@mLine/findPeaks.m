@@ -36,7 +36,6 @@ for layerInd = 1:this.imNums
 end
 
 
-
 function pks = checkDoubles(pksList,threshold)
     pks = zeros(size(pksList));
     for pInd = 1:size(pksList,1)-1
@@ -60,9 +59,12 @@ end
 
 
     function pks = summarizePeaks(gaussList,sgolayList)
-        smap = sgolayList(:,2) < 150;
+        if isnan(this.sgolayEdge)
+            this.sgolayEdge = 0;
+        end
+        smap = sgolayList(:,2) < this.sgolayEdge;
         spart = sgolayList(smap,:);
-        gmap = gaussList(:,2) > 150;
+        gmap = gaussList(:,2) > this.sgolayEdge;
         gpart = gaussList(gmap,:);
         pks = [spart;gpart];
     end
