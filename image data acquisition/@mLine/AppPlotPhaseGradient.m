@@ -20,7 +20,7 @@ if ~isequal(this.fittype,'none')
     % Note that the fitted function is centered around 0. The shown values
     % in the plot needs to be mirrored and shifted
     x = linspace(0,this.edgeFit,1000);
-    if isequal(this.fittype,'poly2')
+    if isequal(this.fittype,'poly2') || isequal(this.fittype,'poly4') || isequal(this.fittype,'poly6')
         y = feval(this.phase_func,x);
     elseif isequal(this.fittype,'power2')
         y = feval(this.phase_func,x(x>0));

@@ -35,7 +35,9 @@ classdef  Imstack < handle
 %         rIndexMap = [];     % Calculated refractive index map
         lastLineId = nan;
         n0 = nan;
-        n_overlay = [];     % Imstack overlay with interpolated n-values
+        nIm = [];           % Matrix with interpolated n-values
+        n_overlay = [];     % Image overlay 
+        n_overlay_map = []; % Transparancy map for the overlay
 %         overlayPos = [];    % image position of the n-overlay
         includeLine = [];   % boolean if the line should be included in calculations
         simulatedLine = []; % boolean if the line has been simulated
@@ -132,7 +134,7 @@ classdef  Imstack < handle
 %             this.mLines{lineId}.croped = false;
             x = this.mLines{lineId}.lineCoord(:,1);
             y = this.mLines{lineId}.lineCoord(:,2);
-            [cx,cy,tempP] = improfile(this.imStack(:,:,1),x,y); % Fist line profile to get line size
+            [cx,cy,tempP] = improfile(this.imStack(:,:,1),x,y); % First line profile to get line size
             this.mLines{lineId}.coords = [cx,cy];
 %             this.mLines{lineId}.coordsRaw = [cx,cy];
             dataPoints = zeros(length(tempP),this.imNums);

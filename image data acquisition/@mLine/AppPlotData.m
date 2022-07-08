@@ -70,14 +70,16 @@ end
 
 
 if ~isnan(this.centerZone) && ~isnan(this.centerLine)
-%     le = this.centerLine - this.centerZone;
-%     re = this.centerLine + this.centerZone;
     v = [this.centerZone 0; this.centerZone ymax; this.centerLine ymax; this.centerLine 0];
     f = [1 2 3 4];
-    patch('Faces',f,'Vertices',v,'FaceColor','[0.8500 0.3250 0.0980]','FaceAlpha',0.2,'Parent',imhandle);
-%     text(this.centerLine-20,-0.025,'Center exclution zone')
-    
+    patch('Faces',f,'Vertices',v,'FaceColor','[0.8500 0.3250 0.0980]','FaceAlpha',0.2,'Parent',imhandle);    
 end
+if ~isnan(this.edgeZone) && ~isnan(this.leftEdge) 
+    v = [this.edgeZone 0; this.edgeZone ymax; this.leftEdge ymax; this.leftEdge 0];
+    f = [1 2 3 4];
+    patch('Faces',f,'Vertices',v,'FaceColor','[0.8500 0.3250 0.0980]','FaceAlpha',0.2,'Parent',imhandle);  
+end
+    
 
 end
 

@@ -14,7 +14,7 @@ sg_peak_pos = [find(sg == sg_peak_vals(1)); find(sg == sg_peak_vals(2))];
 
 this.leftPhaseMin = sg_peak_pos(1);
 this.leftPhaseMax = sg_peak_pos(2);
-
+this.layerPhaseStep = 0.5/abs(sg_peak_pos(2)-sg_peak_pos(1));
 
 
 % x = (1:1:this.imNums)';

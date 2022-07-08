@@ -1,6 +1,7 @@
 function uppdateImstackImage(app)
 % Check if to show cropped
 if app.ShowCropedIm.Value    
+
     imshow(app.lens.imStack(:,:,app.LayerSpinner.Value),'Parent',app.UIAxes)
     if app.ShowLines.Value
         % Check if there are any support lines
@@ -15,9 +16,12 @@ if app.ShowCropedIm.Value
             app.lens.AppPlotLines(app.UIAxes,'sampling',app.SamplingLineSpinner.Value)
         end
     end
-    if app.RefractiveIndexOverlayCheckBox.Value && ~isempty(app.lens.n_overlay)
-        imagesc(app.lens.n_overlay,'AlphaData',0.5,'Parent',app.UIAxes)
+    if app.RefractiveIndexOverlayCheckBox.Value && ~isempty(app.lens.n_overlay) 
+        app.UIAxes.NextPlot = 'add';
+        h = imshow(app.lens.n_overlay,'Parent',app.UIAxes);
+        set(h, 'AlphaData', app.lens.n_overlay_map)
     end
+    
 else
     imshow(app.lens.imStackRaw(:,:,app.LayerSpinner.Value),'Parent',app.UIAxes)
     if app.ShowCropRec.Value && ~isempty(app.lens.cropRect)

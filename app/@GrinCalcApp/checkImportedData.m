@@ -70,12 +70,12 @@ end
 % if ~isempty(app.lens.calibIm)
 %     imshow(app.lens.calibIm,'Parent',app.UIAxesCalibration)
 % end
-% if ~isnan(app.lens.lambda)
-%     app.Wavelenght.Value = app.lens.lambda;
-% end
-% if ~isnan(app.lens.n0)
-%     app.n0.Value = app.lens.n0;
-% end
+if ~isnan(app.lens.lambda)
+    app.WavelengthnmEditField.Value = app.lens.lambda;
+end
+if ~isnan(app.lens.n0)
+    app.OutsiderefractiveindexEditField.Value = app.lens.n0;
+end
 % if ~isnan(app.lens.calibKnownDistance)
 %     app.CalibDist.Value = app.lens.calibKnownDistance/10^-6;
 % end

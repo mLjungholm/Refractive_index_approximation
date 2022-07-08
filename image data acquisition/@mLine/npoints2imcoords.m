@@ -1,18 +1,22 @@
-function xy = npoints2imcoords(this)
+function imCoords = npoints2imcoords(this) % [x,y]pairs
 if isempty(this.refractiveGradient)
 %     x = nan; y = nan; n = nan;
-xy = [];
+imCoords = [];
     return
 end
-g_dist = this.centerLine - this.gradientD;
-pnums = length(g_dist);
+gDist = this.centerLine - this.gradientD./this.pixelSize;
+pnums = length(gDist);
 % closestP = zeros(pnums,1);
-xy = zeros(pnums,2);
+imCoords = zeros(pnums,2);
 % y = zeros(pnums,1);
+lineDist = this.d;
+if this.dataFliped
+    lineDist = flipud(lineDist);
+end
 for pind = 1:pnums
-    difd = abs(this.d - g_dist(pind));
+    difd = abs(lineDist - gDist(pind));
     closestP = find(difd == min(difd));
-    xy(pind) = this.coords(closestP,:);
+    imCoords(pind,:) = this.coords(closestP,:);
 %     x(pind) = this.coords(closestP,2);
 end
 

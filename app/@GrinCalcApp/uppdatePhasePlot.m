@@ -14,6 +14,17 @@ end
 layerIndex = app.LayerSpinner.Value;
 lineInd = app.SamplingLineSpinner.Value;
 
+if ~isnan(app.lens.mLines{lineInd}.leftPhaseMax)
+    
+app.MaxLayerEditField.Value = app.lens.mLines{lineInd}.leftPhaseMax;
+app.MinLayerEditField.Value = app.lens.mLines{lineInd}.leftPhaseMin;
+end
+if ~isnan(app.lens.mLines{lineInd}.centerZone)
+app.CenterExclusionEditField.Value = app.lens.mLines{lineInd}.centerZone;
+end
+if ~isnan(app.lens.mLines{lineInd}.edgeZone)
+app.EdgeExclusionEditField.Value = app.lens.mLines{app.SamplingLineSpinner.Value}.edgeZone;
+end
 if ~isnan(app.lens.mLines{lineInd}.layerPhaseStep)
     app.LayerPhaseShift.Value = app.lens.mLines{lineInd}.layerPhaseStep;
 end
@@ -62,33 +73,3 @@ switch tools
 end
 
 end
-%
-% if app.SamplingLineSpinnerPhase.Value == app.currentSamplingLine
-%     return
-% elseif app.SamplingLineSpinnerPhase.Value > length(app.lens.mLines)
-%     app.SamplingLineSpinnerPhase.Value = app.currentSamplingLine;
-%     return
-% elseif isempty(app.lens.mLines{app.SamplingLineSpinnerPhase.Value})
-%     app.SamplingLineSpinnerPhase.Value = app.currentSamplingLine;
-%     return
-% end
-%
-% app.currentSamplingLine = app.SamplingLineSpinnerPhase.Value;
-% app.SamplingLineSpinner.Value = app.SamplingLineSpinnerPhase.Value;
-%
-% lineInd = app.SamplingLineSpinnerPhase.Value;
-% if isempty(app.lens.mLines{lineInd}.PP)
-%     return
-% end
-%
-% for pInd = 1:app.lens.mLines{lineInd}.pksNums
-%     if app.lens.mLines{lineInd}.PP(pInd) ~= 0
-%         plot(app.UIAxesPhase,app.lens.mLines{lineInd}.PD(pInd),app.lens.mLines{lineInd}.PP(pInd),'b.','markerSize',15)
-%     end
-% end
-% maxX = app.lens.mLines{lineInd}.centerLine;
-% maxY = max(app.lens.mLines{lineInd}.PP);
-% startLine = [0 0; 0 maxY];
-% endLine = [maxX 0; maxX maxY];
-% plot(app.UIAxesPhase, startLine(:,1),startLine(:,2),'k')
-% plot(app.UIAxesPhase,endLine(:,1),endLine(:,2),'k')

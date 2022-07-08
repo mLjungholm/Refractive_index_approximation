@@ -11,4 +11,3 @@ for imInd = 1:this.imNums
     this.imStack(:,:,imInd) = imcrop(this.imStackRaw(:,:,imInd), this.cropRect);
 end
 end
-

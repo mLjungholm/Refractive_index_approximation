@@ -48,13 +48,12 @@ classdef mLine < handle
         leftPhaseMax = nan;    % Index for the layer used as reference point for the phase shift
         leftPhaseMin = nan;
         
-%         sgolayZone = 0;
-%         centerVal = [];
+        
+        
         
         centerZone = nan;
         edgeZone = nan;
         sgolayEdge = nan;
-%         sgolayCenter = nan;
         
         %         Variables from the trace peaks function
         PD = [] % Point distance
@@ -68,7 +67,6 @@ classdef mLine < handle
         seriesNums = 0;
         layerPhaseStep = nan;
         edgeFit = nan;
-%         phaseTable = table()
         
         validS = [];
         validP = [];
