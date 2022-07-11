@@ -12,7 +12,7 @@ v = [0;-1];
 p = [0;1.2];
 nRays = 1000;
 width = r;
-n0 = 1.3;
+n0 = 1.37;
 n1 = 1.45;
 ra = r;
 rb = ra/4;
@@ -20,26 +20,23 @@ nProfile = 'square';
 
 % Initiate source
 s = Source_2d(p', v', nRays, width);
-s2 =Source_2d(p', v', nRays, width);
-% Initiate ray trace
 
+% Initiate ray trace
 ds = 10^3;
 tic
-ray_trace(s,ds,n0,n1,ra,rb,nProfile,'meggit')
+ray_trace(s,ds,n0,n1,r,nProfile,'snell')
 s.projectRays([0,0],[1,0],'back');
 toc
-% tic
-% ray_trace(s2,ds,n0,n1,r,nProfile,'rk')
-% toc
 
 % Plot result
 % figure(1)
-% hold on; axis equal; grid on
-% % title('Runge-Kutta ray-trace')
-% plotEllipse(ra,rb,2*pi)
-% plotLine([-1.2*ra 0],[1.2*ra 0],'k')
-% plotLine([0 -1.2*rb],[0 1.2*rb],'k')
+% hold on; axis equal; grid minor
+% % % title('Runge-Kutta ray-trace')
+% plotCircle(r,2*pi)
+% plotLine([-1.2*r 0],[1.2*r 0],'k')
+% plotLine([0 -1.2*r],[0 1.2*r],'k')
 % s.plotRays('r')
+% s.plotEndRays(r/5)
 % s.plotProjection('--b')
 
 
@@ -54,19 +51,19 @@ toc
 
 % r = 1;
 % lambda = r/60;
-xRange = [0,1];
+% xRange = [0,1];
 [truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(s,lambda,nan,0);
-
+% 
 figure(2)
 hold on; grid on
 plot(truePhasePos,relativePhaseShift)
-
+% 
 [peakVal,mPhasePos,nPeaks] = findPeaks(truePhasePos,relativePhaseShift,0.2);
 % peakPos(1) = r;
 scatter(mPhasePos,peakVal,'bo')
-
+% 
 mPhaseShift = get_phase_shift_from_peaks(peakVal,lambda);
-
+% 
 figure(3)
 hold on; grid on
 plot(truePhasePos,truePhaseShift,'b')
@@ -75,35 +72,26 @@ plot(mPhasePos,mPhaseShift,'r')
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Create a new source with the peak positions and trace. This is to be used
-% as a comarison to the aproximation trace.
-
-sContr = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
-
-ds = 10^3;
-ray_trace_elliptical(sContr,ds,n0,n1,ra,rb,nProfile,'meggit')
-sContr.projectRays([0,0],[1,0],'back');
-
-% Plot result
-figure(4)
-hold on; axis equal; grid on
-plotEllipse(ra,rb,2*pi)
-plotLine([-1.2*r 0],[1.2*r 0],'k')
-plotLine([0 -1.2*r],[0 1.2*r],'k')
-sContr.plotRays('r')
-sContr.plotProjection('--b')
 
 
-clear ans ds nRays p peakVal relativePhaseShift v width xRange
+lambda = 545*10^-9;
+n0 = 1.37;
 
+% Test source
+sTest = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
 
+C = IndexSliceEllipse(mPhasePos,mPhaseShift,n0,1);
 
+% Homogenious approximation
+homogenious_approximation_elliptical(sTest,C); 
 
+rayInd = 'all';
+steps = 10^3;
+print_analytical = false;
+gradient_approximation_elliptical(sTest, C, steps, rayInd);
 
-
-
-
-
-
-
-
+figure(3)
+hold on; grid on
+C.plotNCurve
+C.plotN()
+% plot(linspace(r,0,100),nFunc(linspace(r,0,100)),'b')

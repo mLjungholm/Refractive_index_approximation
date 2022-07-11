@@ -148,6 +148,17 @@ classdef Source_2d < handle
             end
         end
         
+        function plotEndRays(this,d)
+            for rayNr = 1:this.nRays
+                if isempty(this.path{rayNr})
+                    % quiver(this.P(rayNr,1),this.P(rayNr,2),this.V(rayNr,1),this.V(rayNr,2),color)
+                else
+                    vd = [this.P(rayNr,:); this.P(rayNr,:) + this.V(rayNr,:).*d];
+                    plot(vd(:,1),vd(:,2),'r')
+                end
+            end
+        end
+        
         % Project the rays onto line defined by a point "p" and vector "v".
         % Returns "nan" if there is no intersection and "inf" if the ray
         % lies on the defined line
