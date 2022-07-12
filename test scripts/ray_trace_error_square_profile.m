@@ -12,8 +12,8 @@ v = [0;-1];
 p = [0;1.2];
 nRays = 1000;
 width = r;
-n0 = 1.37;
-n1 = 1.45;
+n0 = 1.4072;
+n1 = 1.473;
 ra = r;
 rb = ra/4;
 nProfile = 'square';
@@ -90,8 +90,12 @@ steps = 10^3;
 print_analytical = false;
 gradient_approximation_elliptical(sTest, C, steps, rayInd);
 
-figure(3)
+figure(4)
 hold on; grid on
 C.plotNCurve
 C.plotN()
 % plot(linspace(r,0,100),nFunc(linspace(r,0,100)),'b')
+
+
+%%
+
