@@ -7,26 +7,49 @@ clc
 %                           Tracing the rays
 % Source parameters
 lambda = 545*10^-9;
-r = lambda*55*2;
+rn = lambda*55*2;
 v = [0;-1];
 p = [0;1.2];
 nRays = 1000;
-width = r;
+width = rn;
 n0 = 1.4072;
 n1 = 1.473;
-ra = r;
+ra = rn;
 rb = ra/4;
-nProfile = 'square';
+nProfile = 'parabolic';
+% k = (n0-n1)/r^2;
+% nFunc = @(x) k.*x.^2 + n1;
+
+% k = (n0-n1)/rn^2;
+nFunc = @(r,r0) (n0-n1)/rn^2.*r.^2 + n1;
 
 % Initiate source
 s = Source_2d(p', v', nRays, width);
-
+sIm = Source_2d(p', v', 10, width);
+% s2 =Source_2d(p', v', nRays, width);
 % Initiate ray trace
+
 ds = 10^3;
 tic
-ray_trace(s,ds,n0,n1,r,nProfile,'snell')
+ray_trace_elliptical(s,ds,n0,n1,ra,rb,nProfile,'meggit')
+ray_trace_elliptical(sIm,ds,n0,n1,ra,rb,nProfile,'meggit')
 s.projectRays([0,0],[1,0],'back');
 toc
+
+
+% Square trace-------------------------------------------------------------
+% Initiate source
+% s = Source_2d(p', v', nRays, width);
+% sIm = Source_2d(p', v', 10, width);
+% 
+% % Initiate ray trace
+% ds = 10^3;
+% tic
+% ray_trace(s,ds,n0,n1,r,nProfile,'snell')
+% ray_trace(sIm,ds,n0,n1,r,nProfile,'snell')
+% s.projectRays([0,0],[1,0],'back');
+% toc
+%--------------------------------------------------------------------------
 
 % Plot result
 % figure(1)
@@ -75,10 +98,10 @@ plot(mPhasePos,mPhaseShift,'r')
 
 
 lambda = 545*10^-9;
-n0 = 1.37;
+n0 = 1.4072;
 
 % Test source
-sTest = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*r],[0 -1]);
+sTest = Source_2d([mPhasePos(2:end),ones(nPeaks-1,1)*1.2*rn],[0 -1]);
 
 C = IndexSliceEllipse(mPhasePos,mPhaseShift,n0,1);
 
@@ -94,8 +117,42 @@ figure(4)
 hold on; grid on
 C.plotNCurve
 C.plotN()
-% plot(linspace(r,0,100),nFunc(linspace(r,0,100)),'b')
+plot(linspace(rn,0,100),nFunc(linspace(rn,0,100),rn),'b')
 
 
 %%
 
+rn = C.r(1);
+v = [0;-1];
+p = [0;1.2];
+nRays = 1000;
+width = rn;
+n0 = C.n(1);
+
+% Initiate source
+sVal = Source_2d(p', v', 10, width);
+sVal2 = Source_2d(p', v', nRays, width);
+gridNums = 10^3;
+grin = GRIN2d_rotSym(C.n, C.r, gridNums);
+% Initiate ray trace
+stepSize = rn/10^3;
+rayTrace2dGRIN_parallel(sVal,grin,stepSize,rn,n0)
+rayTrace2dGRIN_parallel(sVal2,grin,stepSize,rn,n0)
+
+
+%%
+% Plot result
+figure(1)
+hold on; axis equal; grid minor
+% % title('Runge-Kutta ray-trace')
+plotCircle(rn,2*pi)
+plotLine([-1.2*rn 0],[1.2*rn 0],'k')
+plotLine([0 -1.2*rn],[0 1.2*rn],'k')
+sVal.plotRays('r')
+sIm.plotRays('b')
+
+sVal2.projectRays([0,0],[1,0],'back');
+[truePhaseShift, truePhasePos, relativePhaseShift] = create_interference_pattern(sVal2,lambda,nan,0);
+figure(2)
+% hold on; grid on
+plot(truePhasePos,relativePhaseShift)
